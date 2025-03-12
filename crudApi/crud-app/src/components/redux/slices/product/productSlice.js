@@ -1,76 +1,39 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getProducts, addProducts, getSingleProductData, deleteProducts, updateProduct } from "./productThunks";
+import {createProduct, deleteProduct, fetchProducts, updateProduct} from "./productThunks" 
 
-export const productSlice = createSlice({
+const productSlice = createSlice({
   name: "product",
   initialState: {
     products: [],
-    singleProduct: null, 
-    status: "idle",
+    loading: false,
     error: null,
   },
+  reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getProducts.pending, (state) => {
-        state.status = "loading";
+      .addCase(fetchProducts.pending, (state) => {
+        state.loading = true;
       })
-      .addCase(getProducts.fulfilled, (state, action) => {
-        state.status = "succeeded";
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.loading = false;
         state.products = action.payload;
       })
-      .addCase(getProducts.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to fetch products";
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       })
-      
-
-      .addCase(addProducts.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(addProducts.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.products.push(action.payload); 
-      })
-      .addCase(addProducts.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to add product";
-      })
-
-      .addCase(getSingleProductData.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(getSingleProductData.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.singleProduct = action.payload;
-      })
-      .addCase(getSingleProductData.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to fetch product details";
-      })
-
-      .addCase(deleteProducts.pending, (state) => {
-        state.status = "loading";
-      })
-      .addCase(deleteProducts.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.products = state.products.filter(product => product.id !== action.payload);
-      })
-      .addCase(deleteProducts.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to delete product";
-      })
-
-      .addCase(updateProduct.pending, (state) => {
-        state.status = "loading";
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.products.push(action.payload);
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.products.push(action.payload); 
+        const index = state.products.findIndex((p) => p.id === action.payload.id);
+        if (index !== -1) {
+          state.products[index] = action.payload;
+        }
       })
-      .addCase(updateProduct.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload || "Failed to add product";
-      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.products = state.products.filter((p) => p.id !== action.payload);
+      });
   },
 });
 

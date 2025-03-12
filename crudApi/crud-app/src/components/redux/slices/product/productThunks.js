@@ -1,71 +1,31 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Base_Url } from "../../../data/constant";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Base API URL
+const API_URL = "http://localhost:5000/productData"; // Replace with your API
 
-export const getProducts = createAsyncThunk(
-  "product/getProducts",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(`${Base_Url}/productData/get`);
-      return response.data?.data;
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      return rejectWithValue(error.response?.data || "An error occurred while fetching products.");
-    }
-  }
-);
+// Async Thunks for CRUD operations
 
-export const deleteProducts = createAsyncThunk(
-  "product/deleteProduct",
-  async (id, { rejectWithValue }) => {
-    try {
-      const response = await axios.delete(`${Base_Url}/productData/delete/${id}`);
-      return id; 
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      return rejectWithValue(error.response?.data || "An error occurred while deleting the product.");
-    }
-  }
-);
+// Fetch all products
+export const fetchProducts = createAsyncThunk("products/fetch", async () => {
+  const response = await axios.get(`${API_URL}/get`);
+  return response.data.data;
+});
 
-export const addProducts = createAsyncThunk(
-  "product/addProducts",
-  async (formData, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(`${Base_Url}/productData/create`, formData);
-      return response.data?.data;
-    } catch (error) {
-      console.error("Error creating product:", error);
-      return rejectWithValue(error.response?.data || "An error occurred while creating the product.");
-    }
-  }
-);
+// Create a new product
+export const createProduct = createAsyncThunk("products/create", async (product) => {
+  const response = await axios.post(`${API_URL}/create`, product);
+  return response.data.data;
+});
 
+// Update a product
+export const updateProduct = createAsyncThunk("products/update", async ({ id, data }) => {
+  const response = await axios.put(`${API_URL}/update/${id}`, data);
+  return response.data.data;
+});
 
-export const getSingleProductData = createAsyncThunk(
-  "product/getSingleProductData",
-  async (id, { rejectWithValue }) => {
-    try {
-      const response = await axios.get(`${Base_Url}/productData/get/${id}`);
-      return response.data?.data;
-    } catch (error) {
-      console.error("Error fetching single product:", error);
-      return rejectWithValue(error.response?.data || "An error occurred while fetching the product.");
-    }
-  }
-);
-
-
-export const updateProduct = createAsyncThunk(
-  "product/updateProduct",
-  async ({ id, formData }, { rejectWithValue }) => {
-    try {
-      const response = await axios.put(`${Base_Url}/productData/update/${id}`, formData);
-      return response.data?.data;
-    } catch (error) {
-      console.error("Error updating product:", error);
-      return rejectWithValue(error.response?.data || "An error occurred while updating the product.");
-    }
-  }
-);
+// Delete a product
+export const deleteProduct = createAsyncThunk("products/delete", async (id) => {
+  await axios.delete(`${API_URL}/delete/${id}`);
+  return id;
+});

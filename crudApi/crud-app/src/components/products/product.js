@@ -1,44 +1,101 @@
 "use client";
-import React, { useEffect } from "react";
-import { deleteProducts, getProducts } from "../redux/slices/product/productThunks";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Link from "next/link";
+import { createProduct, deleteProduct, fetchProducts, updateProduct } from "../redux/slices/product/productThunks";
 
-const GetProduct = () => {
+export default function ProductList() {
   const dispatch = useDispatch();
-  const products = useSelector((state) => state.product.products);
-  const status = useSelector((state) => state.product.status);
-  const error = useSelector((state) => state.product.error);
+  const { products, loading, error } = useSelector((state) => state.product);
+  const [newProduct, setNewProduct] = useState({ title: "", price: 0 ,description:""});
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(getProducts()); 
-    }
-  }, [status, dispatch]);
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
-  if (status === "loading") return <p>Loading...</p>;
-  if (status === "failed") return <p>Error: {error}</p>;
-  const handleDelete = (id) => {
-    console.log("Deleting product with ID:", id); 
-    dispatch(deleteProducts(id))
+  const handleCreate = () => {
+    if (newProduct.title) {
+      dispatch(createProduct(newProduct));
+      setNewProduct({ title: "", price: 0 ,description:""});
+    }
   };
 
-  return (
-    <div>
-       <h1>Products</h1>
-      <div>
-       {  
-        products?.map((el,index)=>(
-          <div key={index}>
-            <h2>{el.title}</h2>
-            <button  onClick={() => handleDelete(el.id)}>Delete</button>
-            <Link href={`/editProduct/${el.id}`}>Edit</Link>
-          </div>
-        ))
-       }
+  const handleUpdate = (id) => {
+    if (!id) {
+      console.error("Product ID is undefined!");
+      return;
+    }
+    
+    const updatedData = { title: "Updated Title", price: 100, description: "Updated Description" };
+    dispatch(updateProduct({ id, data: updatedData }));
+    dispatch(fetchProducts())
+  };
+  
+
+  const handleDelete = (id) => {
+    dispatch(deleteProduct(id));
+  };
+
+  return  (
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl my-20 text-black">
+      <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">Product List</h1>
+      
+      <div className="flex flex-col gap-3 mb-4">
+        <input
+          type="text"
+          placeholder="Title"
+          value={newProduct.title}
+          onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
+          className="border p-2 rounded-md outline-none focus:ring-2 focus:ring-blue-500 "
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          value={newProduct.price}
+          onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+          className="border p-2 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="text"
+          placeholder="Description"
+          value={newProduct.description}
+          onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+          className="border p-2 rounded-md outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onClick={handleCreate}
+          className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+        >
+          Add Product
+        </button>
       </div>
+
+      {loading && <p className="text-blue-500">Loading...</p>}
+      {error && <p className="text-red-500">Error: {error}</p>}
+
+      <ul className="space-y-4">
+        {products.map((product) => (
+          <li key={product._id} className="p-4 bg-gray-100 rounded-md flex justify-between items-center shadow">
+            <div>
+              <p className="text-lg font-semibold">{product.title}</p>
+              <p className="text-gray-700">${product.price}</p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleUpdate(product._id)}
+                className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 transition"
+              >
+                Update
+              </button>
+              <button
+                onClick={() => handleDelete(product._id)}
+                className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
-};
-
-export default GetProduct;
+}
