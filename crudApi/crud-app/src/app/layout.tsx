@@ -4,6 +4,7 @@ import "./globals.css";
 import Headers from '../components/layout/header/index';
 import Footer from '../components/layout/footer/index';
 import Providers from '../components/redux/providers'
+import ThemeProvider from '../components/theme/index'
 
 
 
@@ -32,10 +33,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Headers/>
+       
         <Providers>
-        {children}
-        </Providers>
+          <Headers/>  
+          <ThemeProvider>
+          {children}
+          </ThemeProvider>
+          </Providers>
         <Footer/>
       </body>
     </html>

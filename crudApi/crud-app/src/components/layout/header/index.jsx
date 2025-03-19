@@ -1,11 +1,11 @@
 
+
 import Link from 'next/link'
-import React from 'react'
 
 const Headers = () => {
   return (
     <div>
-      <header className="bg-white">
+      <header className="bg-white dark:bg-red-400">
   <div className="mx-auto flex h-16 max-w-screen-xl items-center gap-8 px-4 sm:px-6 lg:px-8">
     <a className="block text-teal-600" href="#">
       <span className="sr-only">Home</span>
@@ -41,6 +41,8 @@ const Headers = () => {
           >
             Register
           </a>
+        
+
         </div>
 
         <button
@@ -61,7 +63,7 @@ const Headers = () => {
       </div>
     </div>
   </div>
-</header>
+      </header>
     </div>
   )
 }

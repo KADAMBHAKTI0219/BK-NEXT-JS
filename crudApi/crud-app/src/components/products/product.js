@@ -2,14 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createProduct, deleteProduct, fetchProducts, updateProduct } from "../redux/slices/product/productThunks";
+import {changeTheme} from "../redux/slices/themeSwitcher/themeSlice"
 
 export default function ProductList() {
   const dispatch = useDispatch();
   const { products, loading, error } = useSelector((state) => state.product);
   const [newProduct, setNewProduct] = useState({ title: "", price: 0 ,description:""});
+  const theme = useSelector((state)=>state.theme.mode)
+
 
   useEffect(() => {
     dispatch(fetchProducts());
+    dispatch(changeTheme(theme == "light" ? "Dark" : "Light"))
   }, [dispatch]);
 
   const handleCreate = () => {
@@ -36,8 +40,8 @@ export default function ProductList() {
   };
 
   return  (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl my-20 text-black">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center">Product List</h1>
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-xl my-20 text-black dark:bg-black dark:text-white">
+      <h1 className="text-2xl font-bold text-gray-800 mb-4 text-center dark:text-white">Product List</h1>
       
       <div className="flex flex-col gap-3 mb-4">
         <input
