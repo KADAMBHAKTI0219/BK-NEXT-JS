@@ -1,12 +1,10 @@
-import {
-    betterAuth
-} from 'better-auth';
+import { betterAuth} from 'better-auth';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export const auth = betterAuth({
     emailAndPassword: {
-        enabled: true,
-        async sendResetPassword(data, request) {
-        },
+        enabled: true
     },
     socialProviders: {
         github: {
@@ -14,4 +12,5 @@ export const auth = betterAuth({
             clientSecret: process.env.GITHUB_CLIENT_SECRET
         }
     },
+    debug:true,
 });
