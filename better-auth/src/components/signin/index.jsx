@@ -16,6 +16,8 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
 
 const SignIn = () => {
       const [credentials, setCredentials] = useState({
@@ -24,14 +26,14 @@ const SignIn = () => {
         rememberMe: false,
       });
       const [loading, setLoading] = useState(false);
-    
+      const router = useRouter()
       const updateField = (field, value) => {
         setCredentials((prev) => ({ ...prev, [field]: value }));
       };
     
   return (
-    <div>
-       <Card className="max-w-md">
+    <div  className="flex justify-center items-center min-h-screen">
+       <Card className="border border-gray-200 p-6 rounded-lg shadow-lg w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
         <CardDescription className="text-xs md:text-sm">
@@ -45,7 +47,7 @@ const SignIn = () => {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              type="email"
+              type="email"  
               placeholder="m@example.com"
               required
               value={credentials.email}
@@ -90,7 +92,9 @@ const SignIn = () => {
               setLoading(true);
               await signIn.email({ email: credentials.email, password: credentials.password });
               setLoading(false);
+              router.push("/dashboard");
             }}
+            
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : "Login"}
           </Button>
@@ -100,7 +104,7 @@ const SignIn = () => {
             variant="outline"
             className="w-full gap-2"
             onClick={async () => {
-              await signIn.social({ provider: "github", callbackURL: "/dashboard" });
+              await signIn.social({ provider: "github", callbackURL: "/api/auth/callback/github" });
             }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
