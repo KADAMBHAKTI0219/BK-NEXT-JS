@@ -2,8 +2,8 @@ import React from 'react'
 
 const page = () => {
   return (
-    <div>
-    
+    <div className='min-h-screen bg-amber-700'>
+        about
     </div>
   )
 }
