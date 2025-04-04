@@ -35,7 +35,7 @@ const Header = () => {
 
   return (
     <header>
-        <div className='bg-theme flex px-11 py-1.5 items-center justify-between'>
+        <div className='bg-theme flex px-9 py-1.5 items-center justify-between'>
            <div className='flex items-center'>
            <h1 className='font-bold font-sans text-base'>Welcome to our international shop! Enjoy free shipping on orders $100 up.</h1>
             <div className='text-primary font-bold border-b '>
@@ -56,7 +56,7 @@ const Header = () => {
             </div>
         </div>
 
-        <div className='flex items-center justify-between py-8 px-11'>
+        <div className='flex items-center justify-between py-8 px-9'>
             <Image src={logo} alt='logo' />
             <div className='relative w-[53%] ms-20' >
                 <input type="text" className='w-full h-full bg-grey px-13 py-3 rounded-lg text-lg' placeholder='Search Products...'/>
@@ -66,11 +66,11 @@ const Header = () => {
                 <div className='flex space-x-2 border border-gray-200 p-1 rounded-md items-center'>
                     <Image src={langflag} alt='langFlag'/>
                     <h1 className=''>English</h1>
-                    <div className='text-gray-500 text-xs pe-2'><IoIosArrowDown /></div>
+                    <div className='text-grey-500 text-xs pe-2'><IoIosArrowDown /></div>
                 </div>
                 <div className='flex space-x-2 border border-gray-200 p-2 rounded-md items-center'>
                     <h1 className='text-xl ps-2'>USD</h1>
-                    <div className='text-gray-500 text-xs'><IoIosArrowDown /></div>
+                    <div className='text-grey-500 text-xs'><IoIosArrowDown /></div>
                 </div>
             </div>
             <div className='flex space-x-5'>
