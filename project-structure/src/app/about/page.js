@@ -1,11 +1,13 @@
-import About1 from '@/components/about/about1'
-import React from 'react'
+
+import React, { Suspense } from 'react'
+import About from '@/components/about'
 
 const page = () => {
   return (
     <div>
-      <About1/>
+      <About/>
     </div>
+
   )
 }
 
