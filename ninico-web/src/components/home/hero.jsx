@@ -34,7 +34,7 @@ const HeroSection = () => {
         {id:2,contact:'Find Store',icon:<CiLocationOn />}
     ]
   return (
-    <div className='flex px-11 space-x-8'>
+    <div className='flex px-9 space-x-8'>
         {/* Side Navbar */}
       <div className='w-56 rounded-md'>
         <div className='py-3 bg-primary flex items-center space-x-3 px-6 rounded-t-md'>
@@ -67,10 +67,10 @@ const HeroSection = () => {
         <div className='flex  space-x-12 items-end'>
             {
                 Navbar.map((navbar, index) => (
-                    <div className="relative group">
-                    <div key={index} className="text-sm font-bold hover:text-primary flex items-end pb-2">
+                    <div className="relative group" key={index}>
+                    <div  className="text-sm font-bold hover:text-primary flex items-end pb-2">
                       <Link href={navbar.href}>{navbar.link}</Link>
-                      {navbar.subtitle && <span className="text-sm text-gray-500"><IoChevronDownSharp /></span>}
+                      {navbar.subtitle && <span className="text-sm text-grey-500"><IoChevronDownSharp /></span>}
                     </div>
                     {   navbar.subtitle &&
                         <div className="absolute left-0 w-52 bg-white border-t-2 border-t-primary invisible group-hover:visible group-hover:opacity-100 transition-all duration-300 shadow-lg z-50 p-4 rounded-b-md">
@@ -141,7 +141,7 @@ const HeroSection = () => {
         <div className='space-y-6'>
                 {
                     HeroSideBanner.map((banner,index)=>(
-                        <div className='relative overflow-hidden rounded-md'>
+                        <div className='relative overflow-hidden rounded-md' key={index}>
                             <Image src={banner.image} alt={banner.title} className='rounded-md hover:scale-105 transition-all duration-300'/>
                             <div className='absolute top-0 px-7 py-7 w-3/4 space-y-1'>
                                 <h1 className='text-primary text-base'>{banner.subTitle}</h1>
