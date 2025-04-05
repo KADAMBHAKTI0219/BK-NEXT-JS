@@ -1,52 +1,77 @@
-'use client'
-import { deleteProduct, getProducts } from '@/lib/productApi';
+'use client';
+
+import { deleteProduct, getProductById, getProducts } from '@/lib/productApi';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const Product = () => {
-  const [data, setData] = useState([]);
-
- const handleDelete = async (productId) => { 
-    const isDeleted = await deleteProduct(productId); 
-
-    if (isDeleted) {
-        console.log(`✅ Product ${productId} removed from state.`);
-        setData((prevData) => prevData.filter((item) => item.id !== productId));
-    } else {
-        console.error("❌ Error deleting product:", productId);
-    }
-};
-
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProducts = async () => {
       try {
-        const products = await getProducts(); 
-        setData(products || []); 
+        const productsData = await getProducts();
+        setProducts(productsData || []);
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData(); 
+    fetchProducts();
   }, []);
 
+  const handleDelete = async (productId) => {
+    try {
+      const isDeleted = await deleteProduct(productId);
+      if (!isDeleted) {
+        const updatedProducts = await getProducts();
+        setProducts(updatedProducts || []);
+      }
+       else {
+        console.error('Failed to delete product:', productId);
+        alert('Failed to delete product. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('An error occurred while deleting the product.');
+    }
+  };
+
   return (
-    <div className='text-center'>
-      <h1 className='text-3xl'>Products</h1>
-      <div className='flex justify-center gap-4 flex-wrap'>
-        {data.length > 0 ? (
-          data.map((item) => (
-            <div key={item.id} className='border  m-2 p-2 w-1/3 mx-auto space-y-2 '>
-              <h2 className='text-2xl'>{item?.Name}</h2>
-              <div className='space-x-4'>
-              <Link href={`/put/${item.id}`} className='bg-blue-600 text-white p-3 rounded-lg'>Edit</Link>
-              <button onClick={() => handleDelete(item?.id)} className='bg-red-500 text-white p-2 rounded-lg'>Delete</button> 
+    <div className="text-center">
+      <h1 className="text-3xl mb-4">Products</h1>
+      <Link href='/addproduct'>Add Product</Link>
+      <div className="flex justify-center gap-4 flex-wrap">
+        {loading ? (
+          <p>Loading products...</p>
+        ) : products.length > 0 ? (
+          products.map((item) => (
+            <div
+              key={item.id}
+              className="border m-2 p-2 w-1/3 mx-auto space-y-2"
+            >
+              <h2 className="text-2xl">{item?.Name}</h2>
+              <div className="space-x-4">
+                <Link
+                  href={`/put/${item.documentId}`}
+                  className="bg-blue-600 text-white p-3 rounded-lg"
+                >
+                  Edit
+                </Link>
+                <button
+                  onClick={() => handleDelete(item.documentId)}
+                  className="bg-red-500 text-white p-2 rounded-lg"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))
         ) : (
-          <p>Loading products...</p>
+          <p>No products found.</p>
         )}
       </div>
     </div>
