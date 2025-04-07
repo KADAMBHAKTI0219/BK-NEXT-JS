@@ -6,33 +6,59 @@ import { useRouter } from "next/navigation";
 
 const UpdateProduct = ({ id }) => {
   const [name, setName] = useState("");
-  const [image, setImage] = useState([]);
+  const [images, setImages] = useState([]); // both existing and new
   const router = useRouter();
+  const token = typeof window !== "undefined" ? localStorage.getItem("jwt") : null;
 
   useEffect(() => {
-    const getSingleData = async () => {
+    const fetchProduct = async () => {
       try {
         const product = await getProductById(id);
         setName(product?.Name || "");
-        // optional: setImage for preview if needed
+
+        const existing = product?.image?.map((img) => ({
+          type: "existing",
+          id: img.id,
+          url: `http://localhost:1337${img.url}`,
+        })) || [];
+
+        setImages(existing);
       } catch (error) {
         console.error("Error fetching product:", error);
       }
     };
 
-    if (id) getSingleData();
+    if (id) fetchProduct();
   }, [id]);
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const newImgs = files.map((file) => ({
+      type: "new",
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    setImages((prev) => [...prev, ...newImgs]);
+  };
+
+  const removeImage = (index) => {
+    const updated = images.filter((_, i) => i !== index);
+    setImages(updated);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("jwt") : null;
+      const existingImageIds = images
+        .filter((img) => img.type === "existing")
+        .map((img) => img.id);
 
-      let imageIds = [];
+      const newImages = images.filter((img) => img.type === "new");
+      let newImageIds = [];
 
-      if (image.length > 0) {
+      if (newImages.length > 0) {
         const formData = new FormData();
-        image.forEach((img) => formData.append("files", img));
+        newImages.forEach((img) => formData.append("files", img.file));
 
         const uploadRes = await axios.post("http://localhost:1337/api/upload", formData, {
           headers: {
@@ -41,13 +67,15 @@ const UpdateProduct = ({ id }) => {
           },
         });
 
-        imageIds = uploadRes.data.map((file) => file.id);
+        newImageIds = uploadRes.data.map((file) => file.id);
       }
+
+      const finalImageIds = [...existingImageIds, ...newImageIds];
 
       const updated = await updateProduct(id, {
         data: {
           Name: name,
-          ...(imageIds.length > 0 && { image: imageIds }),
+          image: finalImageIds,
         },
       });
 
@@ -74,15 +102,36 @@ const UpdateProduct = ({ id }) => {
           placeholder="Enter product name"
         />
 
-        <label htmlFor="image" className="block text-gray-700 font-medium">Image:</label>
+        <label className="block text-gray-700 font-medium">Images:</label>
         <input
           type="file"
           id="image"
           accept="image/*"
           multiple
-          onChange={(e) => setImage(Array.from(e.target.files))}
+          onChange={handleImageChange}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
+        {images.length > 0 && (
+          <div className="grid grid-cols-3 gap-3 mt-4">
+            {images.map((img, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={img.url}
+                  alt="preview"
+                  className="w-full h-24 object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xl"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
         <button
           type="submit"
