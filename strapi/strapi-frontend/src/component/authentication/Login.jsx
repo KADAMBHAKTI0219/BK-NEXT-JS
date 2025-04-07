@@ -3,10 +3,13 @@ import { login } from '@/lib/authApi';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { IoLogoGithub } from "react-icons/io";
+import { FaGoogle } from "react-icons/fa";
 
+const GITHUB_AUTH_URL = "http://localhost:1337/api/connect/github?redirect_uri=http://localhost:3000/connect/github/redirect";
 
-const GITHUB_AUTH_URL = "http://localhost:1337/api/connect/github/redirect";
-const GOOGLE_AUTH_URL = 'http://localhost:1337/api/connect/google/redirect';
+const GOOGLE_AUTH_URL = 'http://localhost:1337/api/connect/google?redirect_uri=http://localhost:3000/connect/google/redirect';
+
 
 const Login = () => {
   const router = useRouter();
@@ -27,7 +30,7 @@ const Login = () => {
       console.error('Error:', error);
       const errorMsg =
         error?.response?.data?.error?.message || 'Login failed. Try again.     ';
-      alert(errorMsg);
+      alert(errorMsg); 
     } finally {
       setLoading(false);
     }
@@ -44,14 +47,15 @@ const Login = () => {
 
 
   return (
-    <div>
+    <div  className="max-w-md mx-auto mt-30 bg-white p-6 rounded-lg shadow-md space-y-4 text-black">
       <form
         onSubmit={loginUser}
-        className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md space-y-4 text-black"
+       className='space-y-4'
       >
-        <h1 className="text-center text-3xl py-10">Login</h1>
+        <h1 className="text-center text-3xl">Login</h1>
 
-        <label htmlFor="identifier" className="block text-gray-700 font-medium">
+      <div>
+      <label htmlFor="identifier" className="block text-gray-700 font-medium">
           Email:
         </label>
         <input
@@ -61,8 +65,10 @@ const Login = () => {
           className="block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+      </div>
 
-        <label htmlFor="password" className="block text-gray-700 font-medium">
+       <div>
+       <label htmlFor="password" className="block text-gray-700 font-medium">
           Password:
         </label>
         <input
@@ -72,24 +78,25 @@ const Login = () => {
           className="block w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
+       </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 mt-4"
           disabled={loading}
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
+      </form>
 
-        <button onClick={handleGithubLogin} className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-        Login with GitHub
+      <button onClick={handleGithubLogin} className="w-full border-2  font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center space-x-2">
+      <span className='text-xl'> <IoLogoGithub /></span> <span> Login With Github</span>
         </button>
 
         <button onClick={handleGoogleLogin}
-        className="w-full bg-blue-800 hover:bg-blue-900 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-         Login With  Google
+        className="w-full border-2 font-semibold py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center space-x-2">
+         <span className='text-xl '> <FaGoogle /></span> <span> Login With Google</span>
         </button>
-      </form>
     </div>
   );
 };
