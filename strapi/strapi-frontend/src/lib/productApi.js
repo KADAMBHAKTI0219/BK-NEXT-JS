@@ -33,12 +33,16 @@ export const getProductById = async (id) => {
     return null;
   }
 };
-
 export const createProduct = async (productData) => {
   try {
-    const headers = getAuthHeaders();
-    console.log("Headers:", headers);
-    const res = await axios.post(API_URL, productData, { headers });
+    const authHeaders = getAuthHeaders(); // assumes this adds Bearer token
+    const res = await axios.post(`${API_URL}`, productData, {
+      headers: {
+        ...authHeaders,
+        'Content-Type': 'application/json',
+      },
+    });
+
     return res.data.data;
   } catch (err) {
     console.error("Error creating product:", err.response?.data || err);
@@ -46,10 +50,15 @@ export const createProduct = async (productData) => {
   }
 };
 
+
 export const updateProduct = async (id, productData) => {
     try {
       const headers = getAuthHeaders();
-      const res = await axios.put(`${API_URL}/${id}`, productData, { headers });
+      const res = await axios.put(`${API_URL}/${id}`, productData, {  headers: {
+        ...headers,
+        "Content-Type": "multipart/form-data",
+      },
+      });
       return res.data.data;
     } catch (error) {
       console.error("Failed to update product:", error.response?.data || error);

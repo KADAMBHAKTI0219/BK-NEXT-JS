@@ -1,6 +1,7 @@
 'use client';
 
 import { deleteProduct, getProductById, getProducts } from '@/lib/productApi';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -53,6 +54,30 @@ const Product = () => {
               key={item.id}
               className="border m-2 p-2 w-1/3 mx-auto space-y-2"
             >
+  <div className="flex flex-wrap justify-center gap-3 mb-4">
+      {item.image && Array.isArray(item.image) ? (
+        item.image.map((img, imgIndex) => {
+          const imageUrl =
+            img?.formats?.medium?.url ||
+            img?.formats?.small?.url ||
+            img?.formats?.thumbnail?.url ||
+            img?.url;
+
+          return (
+            <img
+              key={imgIndex}
+              src={`http://localhost:1337${imageUrl}`} 
+              alt={img.name || "Product Image"}
+              className="w-32 h-32 object-cover rounded border"
+            />
+          );
+        })
+      ) : (
+        <div className="text-gray-400">No images</div>
+      )}
+    </div>
+
+
               <h2 className="text-2xl">{item?.Name}</h2>
               <div className="space-x-4">
                 <Link
