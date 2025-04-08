@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 
 const UpdateProduct = ({ id }) => {
   const [name, setName] = useState("");
-  const [images, setImages] = useState([]); // both existing and new
+    const [description, setDescription] = useState('')
+    const [price, setPrice] = useState("");
+  const [images, setImages] = useState([]); 
   const router = useRouter();
   const token = typeof window !== "undefined" ? localStorage.getItem("jwt") : null;
 
@@ -15,6 +17,9 @@ const UpdateProduct = ({ id }) => {
       try {
         const product = await getProductById(id);
         setName(product?.Name || "");
+        setDescription(product?.description || "");
+        setPrice(product?.price || "");
+        setImages(product?.Images || []);
 
         const existing = product?.image?.map((img) => ({
           type: "existing",
@@ -69,12 +74,14 @@ const UpdateProduct = ({ id }) => {
 
         newImageIds = uploadRes.data.map((file) => file.id);
       }
-
+    
       const finalImageIds = [...existingImageIds, ...newImageIds];
 
       const updated = await updateProduct(id, {
         data: {
           Name: name,
+          description: description,
+          price: price,
           image: finalImageIds,
         },
       });
@@ -100,6 +107,34 @@ const UpdateProduct = ({ id }) => {
           onChange={(e) => setName(e.target.value)}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Enter product name"
+        />
+
+<label htmlFor="description" className="block text-gray-700 font-medium">
+          Description:
+        </label>
+        <input
+          type="text"
+          id="description"
+          name="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter product description"
+          required
+        />
+
+        <label htmlFor="price" className="block text-gray-700 font-medium">
+          Price:
+        </label>
+        <input
+          type="number"
+          id="price"
+          name="price"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter product price"
+          required
         />
 
         <label className="block text-gray-700 font-medium">Images:</label>
