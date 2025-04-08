@@ -27,6 +27,7 @@ export const getProducts = async () => {
 export const getProductById = async (id) => {
   try {
     const res = await axios.get(`${API_URL}/${id}?populate=*`);
+    console.log(res.data.data)
     return res.data?.data;
   } catch (err) {
     console.error("Error fetching product by ID:", err);
@@ -52,20 +53,20 @@ export const createProduct = async (productData) => {
 
 
 export const updateProduct = async (id, productData) => {
-    try {
-      const headers = getAuthHeaders();
-      const res = await axios.put(`${API_URL}/${id}`, productData, {  headers: {
+  try {
+    const headers = getAuthHeaders();
+    const res = await axios.put(`${API_URL}/${id}`, productData, {
+      headers: {
         ...headers,
-        "Content-Type": "multipart/form-data",
       },
-      });
-      return res.data.data;
-    } catch (error) {
-      console.error("Failed to update product:", error.response?.data || error);
-      return null;
-    }
-  };
-  
+    });
+    return res.data.data;
+  } catch (error) {
+    console.error("Failed to update product:", error.response?.data || error);
+    return null;
+  }
+};
+
 
   export const deleteProduct = async (productId) => {
     try {

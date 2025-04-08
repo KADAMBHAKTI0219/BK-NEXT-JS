@@ -1,13 +1,15 @@
 'use client';
 
+import { langContextt } from '@/context/langContext';
 import { deleteProduct, getProductById, getProducts } from '@/lib/productApi';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const {getLocalized,setSelectLang} = useContext(langContextt)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -20,7 +22,6 @@ const Product = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
@@ -45,6 +46,10 @@ const Product = () => {
     <div className="text-center">
       <h1 className="text-3xl mb-4">Products</h1>
       <Link href='/addproduct'>Add Product</Link>
+      <select name="" id="" onChange={(e) => setSelectLang(e.target.value)} className='bg-gray-200 p-2 rounded-lg block text-center mx-auto my-4'>
+        <option value="English">English</option>
+        <option value="Hindi">Hindi</option>
+      </select>
       <div className="flex justify-center gap-4 flex-wrap">
         {loading ? (
           <p>Loading products...</p>
@@ -52,43 +57,32 @@ const Product = () => {
           products.map((item) => (
             <div
               key={item.id}
-              className="border m-2 p-2 w-1/3 mx-auto space-y-2"
+              className="border m-2 p-2 w-1/3 mx-auto space-y-2 rounded-lg bg-black"
             >
-  <div className="flex flex-wrap justify-center gap-3 mb-4">
-      {item.image && Array.isArray(item.image) ? (
-        item.image.map((img, imgIndex) => {
-          const imageUrl =
-            img?.formats?.medium?.url ||
-            img?.formats?.small?.url ||
-            img?.formats?.thumbnail?.url ||
-            img?.url;
+  <div className="flex flex-wrap justify-center gap-3 mb-4 drop-shadow-whi-100 drop-shadow-lg">
 
-          return (
             <img
-              key={imgIndex}
-              src={`http://localhost:1337${imageUrl}`} 
-              alt={img.name || "Product Image"}
-              className="w-32 h-32 object-cover rounded border"
+              key={item.id}
+              src={`http://localhost:1337${item.image[0].url}`} 
+              alt={item.image.name || "Product Image"}
+              className="w-full h-32 object-cover rounded-xl "
             />
-          );
-        })
-      ) : (
-        <div className="text-gray-400">No images</div>
-      )}
     </div>
 
 
-              <h2 className="text-2xl">{item?.Name}</h2>
-              <div className="space-x-4">
+              <h2 className="text-2xl text-white font-semibold"><Link href={`/productDetails/${item?.documentId}`}>{getLocalized(item, 'Name')}
+              </Link></h2>
+              <p className="text-gray-400 text-lg font-semibold">Price:{getLocalized(item, 'price')}</p>
+              <div className="space-x-4 flex justify-center">
                 <Link
                   href={`/put/${item.documentId}`}
-                  className="bg-blue-600 text-white p-3 rounded-lg"
+                  className="bg-blue-600 text-white p-2 rounded-lg w-1/3"
                 >
                   Edit
                 </Link>
                 <button
                   onClick={() => handleDelete(item.documentId)}
-                  className="bg-red-500 text-white p-2 rounded-lg"
+                  className="bg-red-500 text-white p-2 rounded-lg w-1/3"
                 >
                   Delete
                 </button>
