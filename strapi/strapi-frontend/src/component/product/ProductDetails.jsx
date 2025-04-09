@@ -5,6 +5,7 @@ import React, { useContext } from 'react'
 const ProductDetails = ({product}) => {
     const {getLocalized } = useContext(langContextt)
     console.log("product",product)
+    const about = product.about ? product.about.about : 'No About'
 
   return (
     <div className='flex flex-col items-center justify-center my-24 space-y-10 w-1/2 mx-auto border p-10 rounded-lg shadow-2xl'>
@@ -34,6 +35,10 @@ const ProductDetails = ({product}) => {
     </div>
             <h2 className='text-2xl font-bold text-center'>{getLocalized (product,'name')}</h2>
             <p className='text-lg text-center '>{getLocalized (product,'description')}</p>
+            <p className='text-lg text-center'>Category: {product.category ? product.category.name : 'No category'}</p>
+            <p className="text-lg text-center">
+                About: {product.about ? product.about.about : 'No About'}
+              </p>
             <p className='text-lg text-center'>Price: {getLocalized (product,'price')}</p>
         </div>
     </div>

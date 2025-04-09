@@ -73,7 +73,7 @@ const Product = () => {
               <h2 className="text-2xl text-white font-semibold"><Link href={`/productDetails/${item?.documentId}`}>{getLocalized(item, 'name')}
               </Link></h2>
               <p className="text-gray-400 text-lg font-semibold">Price:{getLocalized(item, 'price')}</p>
-              <p className="text-gray-400 text-lg font-semibold">{getLocalized(item,'category')}</p>
+             
               <div className="space-x-4 flex justify-center">
                 <Link
                   href={`/put/${item.documentId}`}
