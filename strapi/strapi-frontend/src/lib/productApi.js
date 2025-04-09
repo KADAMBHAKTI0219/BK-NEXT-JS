@@ -13,16 +13,21 @@ const getAuthHeaders = () => {
   };
 };
 
-export const getProducts = async () => {
+export const getProducts = async (lang) => {
   try {
-    const res = await axios.get(API_URL + "?populate=*");
+    const res = await axios.get(`${API_URL}?populate=*`, {
+      params: { locale: lang },
+    });
+    console.log(res.data); // Check the structure of the API response
     if (res.status !== 200) throw new Error("Failed to fetch products");
-    return res.data.data;
+    return res.data.data; // Ensure this is the array of products
   } catch (err) {
     console.error("Error fetching products:", err);
     return null;
   }
 };
+
+
 
 export const getProductById = async (id) => {
   try {
@@ -34,38 +39,38 @@ export const getProductById = async (id) => {
     return null;
   }
 };
-export const createProduct = async (productData) => {
-  try {
-    const authHeaders = getAuthHeaders(); // assumes this adds Bearer token
-    const res = await axios.post(`${API_URL}`, productData, {
-      headers: {
-        ...authHeaders,
-        'Content-Type': 'application/json',
-      },
-    });
 
-    return res.data.data;
-  } catch (err) {
-    console.error("Error creating product:", err.response?.data || err);
-    return null;
-  }
+export const createProduct = async (productData,locale) => {
+  const token = typeof window !== "undefined" ? localStorage.getItem("jwt") : null;
+
+  const res = await axios.post(`${API_URL}?locale=${locale}`, {
+    data: productData
+  }, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data;
 };
 
-
-export const updateProduct = async (id, productData) => {
+export const updateProduct = async (id, productData, locale) => {
   try {
     const headers = getAuthHeaders();
-    const res = await axios.put(`${API_URL}/${id}`, productData, {
-      headers: {
-        ...headers,
-      },
-    });
+
+    const res = await axios.put(
+      `${API_URL}/${id}?locale=${locale}`,
+      productData,
+      { headers }
+    );
+
     return res.data.data;
   } catch (error) {
     console.error("Failed to update product:", error.response?.data || error);
     return null;
   }
 };
+
 
 
   export const deleteProduct = async (productId) => {

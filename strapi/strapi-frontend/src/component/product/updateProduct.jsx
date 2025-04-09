@@ -1,40 +1,41 @@
 'use client';
 import { getProductById, updateProduct } from "@/lib/productApi";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { langContextt } from "@/context/langContext";
 
 const UpdateProduct = ({ id }) => {
   const [name, setName] = useState("");
-    const [description, setDescription] = useState('')
-    const [price, setPrice] = useState("");
-  const [images, setImages] = useState([]); 
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [images, setImages] = useState([]);
   const router = useRouter();
+  const { selectLang, getLocalized } = useContext(langContextt);
   const token = typeof window !== "undefined" ? localStorage.getItem("jwt") : null;
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const product = await getProductById(id);
-        setName(product?.Name || "");
-        setDescription(product?.description || "");
+        setName(getLocalized(product, "name") || "");
+        setDescription(getLocalized(product, "description") || "");
         setPrice(product?.price || "");
-        setImages(product?.Images || []);
 
-        const existing = product?.image?.map((img) => ({
+        const existingImages = product?.image?.map((img) => ({
           type: "existing",
           id: img.id,
           url: `http://localhost:1337${img.url}`,
         })) || [];
 
-        setImages(existing);
+        setImages(existingImages);
       } catch (error) {
         console.error("Error fetching product:", error);
       }
     };
 
     if (id) fetchProduct();
-  }, [id]);
+  }, [id, selectLang]);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -47,58 +48,54 @@ const UpdateProduct = ({ id }) => {
   };
 
   const removeImage = (index) => {
-    const updated = images.filter((_, i) => i !== index);
-    setImages(updated);
+    setImages(images.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const existingImageIds = images
-        .filter((img) => img.type === "existing")
-        .map((img) => img.id);
-
-      const newImages = images.filter((img) => img.type === "new");
+      const existingImageIds = images.filter(img => img.type === "existing").map(img => img.id);
+      const newImages = images.filter(img => img.type === "new");
       let newImageIds = [];
-
+  
       if (newImages.length > 0) {
         const formData = new FormData();
-        newImages.forEach((img) => formData.append("files", img.file));
-
+        newImages.forEach(img => formData.append("files", img.file));
+  
         const uploadRes = await axios.post("http://localhost:1337/api/upload", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
             ...(token && { Authorization: `Bearer ${token}` }),
           },
         });
-
-        newImageIds = uploadRes.data.map((file) => file.id);
+  
+        newImageIds = uploadRes.data.map(file => file.id);
       }
-    
+  
       const finalImageIds = [...existingImageIds, ...newImageIds];
-
-      const updated = await updateProduct(id, {
-        data: {
-          Name: name,
-          description: description,
-          price: price,
-          image: finalImageIds,
-        },
-      });
-
-      if (updated) {
-        console.log("Product updated:", updated);
-        router.push("/product");
-      }
+  
+      const updateData = {
+        name,
+        description,
+        price: Number(price),
+        image: finalImageIds,
+      };
+  
+      await updateProduct(id, { data: updateData }, selectLang);
+      console.log("Product updated:", updateData);
+      router.push("/product");
     } catch (error) {
       console.error("Update error:", error.response?.data || error.message);
     }
   };
-
+  
   return (
     <div className="my-24">
       <h2 className="text-center text-3xl py-10">Update Product</h2>
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md space-y-4 text-black">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md space-y-4 text-black"
+      >
         <label htmlFor="name" className="block text-gray-700 font-medium">Name:</label>
         <input
           type="text"
@@ -109,13 +106,10 @@ const UpdateProduct = ({ id }) => {
           placeholder="Enter product name"
         />
 
-<label htmlFor="description" className="block text-gray-700 font-medium">
-          Description:
-        </label>
+        <label htmlFor="description" className="block text-gray-700 font-medium">Description:</label>
         <input
           type="text"
           id="description"
-          name="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -123,13 +117,10 @@ const UpdateProduct = ({ id }) => {
           required
         />
 
-        <label htmlFor="price" className="block text-gray-700 font-medium">
-          Price:
-        </label>
+        <label htmlFor="price" className="block text-gray-700 font-medium">Price:</label>
         <input
           type="number"
           id="price"
-          name="price"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -140,7 +131,6 @@ const UpdateProduct = ({ id }) => {
         <label className="block text-gray-700 font-medium">Images:</label>
         <input
           type="file"
-          id="image"
           accept="image/*"
           multiple
           onChange={handleImageChange}

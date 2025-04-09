@@ -32,7 +32,7 @@ const ProductDetails = ({product}) => {
         <div className="text-gray-400">No images</div>
       )}
     </div>
-            <h2 className='text-2xl font-bold text-center'>{getLocalized (product,'Name')}</h2>
+            <h2 className='text-2xl font-bold text-center'>{getLocalized (product,'name')}</h2>
             <p className='text-lg text-center '>{getLocalized (product,'description')}</p>
             <p className='text-lg text-center'>Price: {getLocalized (product,'price')}</p>
         </div>

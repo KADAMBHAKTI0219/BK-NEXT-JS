@@ -1,7 +1,7 @@
 'use client';
 
 import { langContextt } from '@/context/langContext';
-import { deleteProduct, getProductById, getProducts } from '@/lib/productApi';
+import { deleteProduct, getProducts } from '@/lib/productApi';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useContext, useEffect, useState } from 'react';
@@ -9,12 +9,12 @@ import { useContext, useEffect, useState } from 'react';
 const Product = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const {getLocalized,setSelectLang} = useContext(langContextt)
+  const {getLocalized,selectLang,setSelectLang} = useContext(langContextt)
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const productsData = await getProducts();
+        const productsData = await getProducts(selectLang);
         setProducts(productsData || []);
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -23,7 +23,7 @@ const Product = () => {
       }
     };
     fetchProducts();
-  }, []);
+  }, [selectLang]);
 
   const handleDelete = async (productId) => {
     try {
@@ -47,8 +47,8 @@ const Product = () => {
       <h1 className="text-3xl mb-4">Products</h1>
       <Link href='/addproduct'>Add Product</Link>
       <select name="" id="" onChange={(e) => setSelectLang(e.target.value)} className='bg-gray-200 p-2 rounded-lg block text-center mx-auto my-4'>
-        <option value="English">English</option>
-        <option value="Hindi">Hindi</option>
+        <option value="en">English</option>
+        <option value="hi-IN">Hindi</option>
       </select>
       <div className="flex justify-center gap-4 flex-wrap">
         {loading ? (
@@ -70,9 +70,10 @@ const Product = () => {
     </div>
 
 
-              <h2 className="text-2xl text-white font-semibold"><Link href={`/productDetails/${item?.documentId}`}>{getLocalized(item, 'Name')}
+              <h2 className="text-2xl text-white font-semibold"><Link href={`/productDetails/${item?.documentId}`}>{getLocalized(item, 'name')}
               </Link></h2>
               <p className="text-gray-400 text-lg font-semibold">Price:{getLocalized(item, 'price')}</p>
+              <p className="text-gray-400 text-lg font-semibold">{getLocalized(item,'category')}</p>
               <div className="space-x-4 flex justify-center">
                 <Link
                   href={`/put/${item.documentId}`}
