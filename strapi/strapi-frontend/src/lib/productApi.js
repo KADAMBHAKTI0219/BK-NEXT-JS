@@ -13,10 +13,12 @@ const getAuthHeaders = () => {
   };
 };
 
-export const getProducts = async (lang) => {
+export const getProducts = async (lang,sort) => {
   try {
     const res = await axios.get(`${API_URL}?populate=*`, {
-      params: { locale: lang },
+      params: { locale: lang ,
+        sort: sort ? `price:${sort}` : undefined, 
+      },
     });
     console.log(res.data); // Check the structure of the API response
     if (res.status !== 200) throw new Error("Failed to fetch products");
