@@ -16,7 +16,7 @@
     }
   },
   "attributes": {
-    "Name": {
+    "name": {
       "type": "string",
       "pluginOptions": {
         "i18n": {
@@ -59,6 +59,27 @@
           "localized": true
         }
       }
+    },
+    "category": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::category.category",
+      "inversedBy": "products"
+    },
+    "about": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::about.about",
+      "mappedBy": "product"
+    },
+    "stock": {
+      "type": "integer"
+    },
+    "custom": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::custom.custom",
+      "inversedBy": "products"
     }
   }
 }
