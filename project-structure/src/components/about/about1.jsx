@@ -12,7 +12,6 @@ const About1 = () => {
             <div key={index} className='p-10 border-2'>
                 <div><Link href={`about/${item.slug}`}>{item.title}</Link></div>
                 <div>{item.description}</div>
-  
             </div>
         ))
        }
