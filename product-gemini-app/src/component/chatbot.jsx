@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { IoLogoWechat } from "react-icons/io5";
 import { AiFillCloseCircle } from "react-icons/ai";
-import { FaHistory } from "react-icons/fa";
+import { FaHistory, FaTrash } from "react-icons/fa";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 
@@ -16,7 +16,7 @@ const ChatBot = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
-  const [sessionMemory, setSessionMemory] = useState([]); // Track current session
+  const [sessionMemory, setSessionMemory] = useState([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -35,9 +35,7 @@ const ChatBot = () => {
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
-      console.log("Fetch response status:", res.status);
       const data = await res.json();
-      console.log("API response from /api/chats:", data);
       if (res.ok) {
         const validData = data.map((msg) => ({
           ...msg,
@@ -56,24 +54,24 @@ const ChatBot = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-  
+
     const userMessage = { role: "user", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-  
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input, userId: session?.user?.id || null, sessionMemory }),
       });
-  
+
       const data = await res.json();
-  
+
       if (res.ok) {
         setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
-        setSessionMemory(data.sessionMemory); // Update with new memory
+        setSessionMemory(data.sessionMemory);
       } else {
         setMessages((prev) => [
           ...prev,
@@ -90,8 +88,48 @@ const ChatBot = () => {
     }
   };
 
-  // Rest of the component remains the same (history view, UI, etc.)
-  // ... (keep the rest of the code as is)
+  const handleClearChats = async () => {
+    if (!session) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Please log in to clear chat history" },
+      ]);
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to clear all chat history?")) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/clear-chats", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setChatHistory([]);
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: data.message },
+        ]);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: `Error: ${data.message || data.error}` },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error clearing chats:", error);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Error: Failed to clear chat history" },
+      ]);
+    }
+  };
 
   return (
     <div>
@@ -108,38 +146,33 @@ const ChatBot = () => {
             <span>Gemini Chatbot</span>
             <div className="flex gap-2">
               {session && (
-                <button
-                  onClick={() => {
-                    setShowHistory(!showHistory);
-                    if (!showHistory) fetchChatHistory();
-                  }}
-                  className="text-sm bg-blue-700 px-2 py-1 rounded-lg hover:bg-blue-800"
-                  disabled={isLoading}
-                >
-                  <FaHistory />
-                </button>
-              )}
-              {session ? (
-                <button
-                  onClick={() => signOut()}
-                  className="text-sm bg-red-500 px-2 py-1 rounded-lg hover:bg-red-600"
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link
-                  href="/login"
-                  className="text-sm bg-green-500 px-2 py-1 rounded-lg hover:bg-green-600"
-                >
-                  Login
-                </Link>
+                <>
+                  <button
+                    onClick={() => {
+                      setShowHistory(!showHistory);
+                      if (!showHistory) fetchChatHistory();
+                    }}
+                    className="text-sm bg-blue-700 px-2 py-1 rounded-lg hover:bg-blue-800"
+                    disabled={isLoading}
+                    title="View chat history"
+                  >
+                    <FaHistory />
+                  </button>
+                  <button
+                    onClick={handleClearChats}
+                    className="text-sm bg-yellow-500 px-2 py-1 rounded-lg hover:bg-yellow-600"
+                    disabled={isLoading}
+                    title="Clear all chat history"
+                  >
+                    <FaTrash />
+                  </button>
+                </>
               )}
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4">
             {showHistory ? (
-              // History View
               <>
                 {chatHistory.length === 0 ? (
                   <p className="text-gray-500 text-center italic text-lg">
@@ -169,7 +202,6 @@ const ChatBot = () => {
                 )}
               </>
             ) : (
-              // Chat View
               <>
                 {messages.length === 0 && (
                   <p className="text-gray-500 text-center italic text-lg">
