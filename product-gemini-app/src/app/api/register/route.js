@@ -16,14 +16,12 @@ export async function POST(req) {
     const hashedPassword = bcrypt.hashSync(password, 10);
     const userId = uuidv4();
 
-    // Insert user
     await db.collection("users").insertOne({
       email,
       password: hashedPassword,
       userId,
     });
 
-    // Seed purchases for this user
     await db.collection("purchases").insertMany([
       {
         userId,
@@ -36,6 +34,7 @@ export async function POST(req) {
         purchaseDate: new Date("2025-02-01"),
       },
     ]);
+    
 
     return NextResponse.json({ message: "User registered and purchases seeded" });
   } catch (error) {
