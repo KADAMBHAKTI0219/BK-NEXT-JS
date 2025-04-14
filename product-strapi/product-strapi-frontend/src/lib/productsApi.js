@@ -8,8 +8,8 @@ export const getProducts = async () => {
         "Content-Type": "application/json",
       },
     });
-    console.log("Products fetched successfully:", getProductsData.data);
-    return getProductsData.data;
+    console.log("Products fetched successfully:", getProductsData.data.data);
+    return getProductsData.data.data;
   } catch (error) {
     console.error("Error fetching products:", error);
     throw error;
