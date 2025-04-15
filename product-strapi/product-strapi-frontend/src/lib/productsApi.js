@@ -34,18 +34,26 @@ export const getProductById = async (id) => {
   }
 };
 
-export const createProduct = async (productData) => {
+export const createProduct = async (formData) => {
   try {
-    const createProductData = await axios.post(PRODUCTS_API_URL, productData, {
+    console.log('Posting to:', PRODUCTS_API_URL );
+    const token = localStorage.getItem('jwt')
+    console.log(token)
+    // Debug FormData to verify structure
+    for (const [key, value] of formData.entries()) {
+      console.log(`FormData ${key}:`, value instanceof File ? value.name : value);
+    }
+    const response = await axios.post(PRODUCTS_API_URL, formData, {
       headers: {
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Ensure token is set
+        // Let axios set Content-Type automatically for FormData
       },
     });
-    console.log("Product created successfully:", createProductData.data);
-    return createProductData.data;
+    console.log('Response:', response.data);
+    return response.data;
   } catch (error) {
-    console.error("Error creating product:", error);
-    throw error;
+    console.error('Error response:', error.response?.data);
+    throw new Error(error.response?.data?.error?.message || 'Failed to create product');
   }
 };
 

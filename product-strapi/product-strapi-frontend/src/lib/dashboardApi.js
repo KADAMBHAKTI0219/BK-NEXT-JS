@@ -1,9 +1,9 @@
-const DASHBOARD_API_URL = "https://localhost:1337/dashboard/combinedData";
+const DASHBOARD_API_URL = "http://localhost:1337/api/combined-data";
 import axios from "axios";
 
 export const getDashboard = async () => {
   try {
-    const getDashboardData = await axios.get(DASHBOARD_API_URL, {
+    const getDashboardData = await axios.get(DASHBOARD_API_URL + '?populate=*', {
       headers: {
         "Content-Type": "application/json",
       },

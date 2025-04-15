@@ -1,11 +1,13 @@
 
-import UpdateProducts from '@/components/products/updateProducts'
+
+import UpdateProducts from '@/components/products/UpdateProducts'
 import React from 'react'
 
-const page = () => {
+const page = ({params}) => {
+  const {id} = params
   return (
     <div>
-      <UpdateProducts/>
+      <UpdateProducts params={{id}}/>
     </div>
   )
 }

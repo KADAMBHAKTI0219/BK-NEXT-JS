@@ -75,10 +75,6 @@
         "videos",
         "audios"
       ]
-    },
-    "organization": {
-      "type": "string",
-      "required": true
     }
   }
 }

@@ -12,9 +12,8 @@ module.exports = {
         handler: 'dashboard.combinedData',
         config: {
           auth: false,
-          policies: [],
           middlewares: [],
         },
       },
     ],
-  };
+  };  

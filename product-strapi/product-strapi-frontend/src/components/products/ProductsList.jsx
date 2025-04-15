@@ -1,17 +1,28 @@
 'use client'
 
-import { getProducts } from '@/lib/productsApi'
+import { deleteProduct, getProducts } from '@/lib/productsApi'
 import Image from 'next/image'
+import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 
 const ProductsList = () => {
   const [productList, setProductsList] = useState([])
+  const [cat,setcat] = useState('')
 
+  const handleDelete =async (id)=>{
+   try{
+    const response = await deleteProduct(id)
+    console.log(response)
+   }
+   catch(error){
+    console.error(error)
+   }
+  }
   useEffect(() => {
-    getProducts()
+    getProducts(cat)
       .then(data => setProductsList(data))
       .catch(err => console.log(err))
-  }, [])
+  }, [cat])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,6 +38,7 @@ const ProductsList = () => {
             />
             <select
               className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e)=>setcat(e.target.value)}
             >
               <option value="">Select Category</option>
               <option value="chocolates">Chocolates</option>
@@ -104,10 +116,10 @@ const ProductsList = () => {
                     {product.category.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-800 mr-4">
+                    <Link className="text-blue-600 hover:text-blue-800 mr-4" href={`/update/${product.documentId}`}>
                       Edit
-                    </button>
-                    <button className="text-red-600 hover:text-red-800">
+                    </Link>
+                    <button className="text-red-600 hover:text-red-800" onClick={(e)=>handleDelete(product.documentId)}>
                       Delete
                     </button>
                   </td>
