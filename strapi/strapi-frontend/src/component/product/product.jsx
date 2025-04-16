@@ -37,6 +37,7 @@ const Product = () => {
         console.error('Failed to delete product:', productId);
         alert('Failed to delete product. Please try again.');
       }
+      
     } catch (error) {
       console.error('Error deleting product:', error);
       alert('An error occurred while deleting the product.');
