@@ -1,92 +1,120 @@
-const PRODUCTS_API_URL = "http://localhost:1337/api/products";
-import axios from "axios";
+const PRODUCT_URL = 'http://localhost:1337/api/products';
+const UPLOAD_URL = 'http://localhost:1337/api/upload';
+import axios from 'axios';
 
-export const getProducts = async () => {
+const getAuthorization = () => {
+  const jwt = typeof window !== 'undefined' ? localStorage.getItem('jwt') : null;
+  return jwt ? { Authorization: `Bearer ${jwt}` } : {};
+};
+
+export const getProducts = async ({ search = '', category = '', price = '', stock = '' }) => {
   try {
-    const getProductsData = await axios.get(`${PRODUCTS_API_URL}?populate=*`, {
+    const response = await axios.get(PRODUCT_URL, {
+      params: { search, category, price, stock, 'populate': 'images,category' },
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
+        ...getAuthorization(),
       },
     });
-    console.log("Products fetched successfully:", getProductsData.data.data);
-    return getProductsData.data.data;
+    console.log('Products fetched successfully:', response.data.data);
+    return response.data.data.map((item) => ({
+      id: item.id,
+      documentId: item.documentId,
+      name: item.attributes?.name || item.name || '',
+      price: item.attributes?.price || item.price || 0,
+      stock: item.attributes?.stock || item.stock || 0,
+      category: item.attributes?.category?.data?.attributes || item.category || null,
+      images: item.attributes?.images?.data || item.images || [],
+    }));
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error('Error fetching products:', error.response?.data || error.message);
     throw error;
   }
 };
 
 export const getProductById = async (id) => {
   try {
-    const getProductData = await axios.get(
-      `${PRODUCTS_API_URL}/${id}?populate=*`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("Product fetched successfully:", getProductData.data);
-    return getProductData.data;
+    const response = await axios.get(`${PRODUCT_URL}/${id}?populate=*`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthorization(),
+      },
+    });
+    console.log('Product fetched successfully:', response.data.data);
+    
+    return response.data.data
   } catch (error) {
-    console.error("Error fetching product by ID:", error);
+    console.error('Error fetching product by ID:', error.response?.data || error.message);
     throw error;
   }
 };
 
-export const createProduct = async (formData) => {
+export const createProduct = async (productData) => {
   try {
-    console.log('Posting to:', PRODUCTS_API_URL );
-    const token = localStorage.getItem('jwt')
-    console.log(token)
-    // Debug FormData to verify structure
-    for (const [key, value] of formData.entries()) {
-      console.log(`FormData ${key}:`, value instanceof File ? value.name : value);
-    }
-    const response = await axios.post(PRODUCTS_API_URL, formData, {
+    const response = await axios.post(PRODUCT_URL, { data: productData }, {
       headers: {
-        Authorization: `Bearer ${token}`, // Ensure token is set
-        // Let axios set Content-Type automatically for FormData
+        'Content-Type': 'application/json',
+        ...getAuthorization(),
       },
     });
-    console.log('Response:', response.data);
+    console.log('Product created successfully:', response.data);
     return response.data;
   } catch (error) {
-    console.error('Error response:', error.response?.data);
-    throw new Error(error.response?.data?.error?.message || 'Failed to create product');
+    console.error('Error creating product:', error.response?.data || error.message);
+    throw error;
   }
 };
 
 export const updateProduct = async (id, productData) => {
   try {
-    const updateProductData = await axios.put(
-      `${PRODUCTS_API_URL}/${id}`,
-      productData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("Product updated successfully:", updateProductData.data);
-    return updateProductData.data;
+    const response = await axios.put(`${PRODUCT_URL}/${id}`, { data: productData }, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthorization(),
+      },
+    });
+    console.log('Product updated successfully:', response.data.data);
+    return response.data.data;
   } catch (error) {
-    console.error("Error updating product:", error);
+    console.error('Error updating product:', error.response?.data || error.message);
     throw error;
   }
 };
 
 export const deleteProduct = async (id) => {
   try {
-    const deleteProductData = await axios.delete(`${PRODUCTS_API_URL}/${id}`, {
+    console.log('Sending DELETE request for product ID:', id); // Debug ID
+    const response = await axios.delete(`${PRODUCT_URL}/${id}`, {
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
+        ...getAuthorization(),
       },
     });
-    console.log("Product deleted successfully:", deleteProductData.data);
-    return deleteProductData.data;
+    console.log('Product deleted successfully:', response.data.data);
+    return response.data.data;
   } catch (error) {
-    console.error("Error deleting product:", error);
+    console.error('Error deleting product:', error.response?.data || error.message);
     throw error;
+  }
+};
+
+export const uploadImages = async (images) => {
+  try {
+    const formData = new FormData();
+    images.forEach((image) => {
+      formData.append('files', image);
+    });
+
+    const response = await axios.post(UPLOAD_URL, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        ...getAuthorization(),
+      },
+    });
+    console.log('Images uploaded successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error uploading images:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.error?.message || 'Failed to upload images');
   }
 };

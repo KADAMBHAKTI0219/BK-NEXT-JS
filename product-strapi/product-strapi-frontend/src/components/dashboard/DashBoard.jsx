@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import { getDashboard } from '@/lib/dashboardApi'
 import React, { useEffect, useState } from 'react'
 

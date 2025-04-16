@@ -1,6 +1,8 @@
-  "use client";
-import { createProduct } from '@/lib/productsApi';
-import React, { useState } from 'react';
+'use client';
+
+import { createProduct, uploadImages } from '@/lib/productsApi';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 const AddProducts = () => {
   const [formData, setFormData] = useState({
@@ -11,9 +13,25 @@ const AddProducts = () => {
     images: [],
   });
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('http://localhost:1337/api/categories');
+        setCategories(response.data.data);
+      } catch (err) {
+        console.error('Error fetching categories:', err);
+        setError('Failed to load categories.');
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     if (name === 'images') {
@@ -22,17 +40,18 @@ const AddProducts = () => {
         ['image/jpeg', 'image/png'].includes(file.type)
       );
       if (validFiles.length !== selectedFiles.length) {
-        setError('Only JPEG or PNG images are allowed');
+        setError('Only JPEG or PNG images are allowed.');
         return;
       }
-      setFormData((prev) => ({ ...prev, images: validFiles }));
+      setFormData((prev) => ({ ...prev, images: [...prev.images, ...validFiles] }));
       const previews = validFiles.map((file) => URL.createObjectURL(file));
-      setImagePreviews(previews);
+      setImagePreviews((prev) => [...prev, ...previews]);
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // Remove image
   const handleRemoveImage = (index) => {
     setFormData((prev) => ({
       ...prev,
@@ -44,36 +63,42 @@ const AddProducts = () => {
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
-    const data = new FormData();
     if (!formData.name || !formData.price || !formData.stock || !formData.category) {
-      setError('All fields are required');
+      setError('All fields are required.');
       setIsLoading(false);
       return;
     }
-    data.append('data', JSON.stringify({
-      name: formData.name,
-      price: Number(formData.price),
-      stock: Number(formData.stock),
-      category: Number(formData.category), // Fixed to numeric ID
-    }));
-    formData.images.forEach((image) => {
-      data.append('files.images', image);
-    });
-
-    // Enhanced debug to verify FormData
-    console.log('Raw FormData entries:');
-    for (const [key, value] of data.entries()) {
-      console.log(`FormData ${key}:`, value instanceof File ? value.name : value);
-    }
 
     try {
-      const response = await createProduct(data);
-      console.log('Product created:', response);
+      let imageIds = [];
+
+      // Upload images if any
+      if (formData.images.length > 0) {
+        const uploadedImages = await uploadImages(formData.images);
+        imageIds = uploadedImages.map((img) => img.id);
+      }
+
+      // Prepare product data
+      const productData = {
+        name: formData.name,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock, 10),
+        category: parseInt(formData.category, 10),
+        images: imageIds,
+      };
+
+      console.log('Submitting product data:', productData);
+
+      // Create product
+      await createProduct(productData);
+
+      // Reset form
       setFormData({
         name: '',
         price: '',
@@ -82,107 +107,95 @@ const AddProducts = () => {
         images: [],
       });
       setImagePreviews([]);
-    } catch (error) {
-      console.error('Submission error details:', error);
-      setError(`Submission failed: ${error.message}`);
+      alert('Product created successfully!');
+    } catch (err) {
+      console.error('Submission error:', err.response?.data || err.message);
+      setError(`Failed to create product: ${err.response?.data?.error?.message || err.message}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '20px auto', fontFamily: 'Arial' }}>
-      <h2>Add New Product</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow">
+      <h2 className="text-2xl font-bold mb-4">Add New Product</h2>
+      {error && <p className="text-red-600 mb-4">{error}</p>}
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="name">Product:</label>
+        <div className="mb-4">
+          <label className="block text-gray-700">Name</label>
           <input
             type="text"
-            id="name"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
             required
-            style={{ width: '100%', padding: '5px' }}
+            className="w-full px-4 py-2 border rounded-md"
           />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="price">Price:</label>
+        <div className="mb-4">
+          <label className="block text-gray-700">Price</label>
           <input
             type="number"
-            id="price"
             name="price"
             value={formData.price}
             onChange={handleInputChange}
             min="0"
             step="0.01"
             required
-            style={{ width: '100%', padding: '5px' }}
+            className="w-full px-4 py-2 border rounded-md"
           />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="stock">Stock:</label>
+        <div className="mb-4">
+          <label className="block text-gray-700">Stock</label>
           <input
             type="number"
-            id="stock"
             name="stock"
             value={formData.stock}
             onChange={handleInputChange}
             min="0"
             required
-            style={{ width: '100%', padding: '5px' }}
+            className="w-full px-4 py-2 border rounded-md"
           />
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="category">Category:</label>
+        <div className="mb-4">
+          <label className="block text-gray-700">Category</label>
           <select
-            id="category"
             name="category"
             value={formData.category}
             onChange={handleInputChange}
             required
-            style={{ width: '100%', padding: '5px' }}
+            className="w-full px-4 py-2 border rounded-md"
           >
             <option value="">Select a category</option>
-            <option value="3">Chocolates</option>
-            {/* Add more options dynamically via API if needed */}
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.attributes?.name || cat.name}
+              </option>
+            ))}
           </select>
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="images">Images:</label>
+        <div className="mb-4">
+          <label className="block text-gray-700">Images</label>
           <input
             type="file"
-            id="images"
             name="images"
             accept="image/jpeg,image/png"
             multiple
             onChange={handleInputChange}
-            style={{ width: '100%' }}
+            className="w-full px-4 py-2 border rounded-md"
           />
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
+          <div className="flex flex-wrap gap-4 mt-2">
             {imagePreviews.map((preview, index) => (
-              <div key={index} style={{ position: 'relative' }}>
+              <div key={index} className="relative">
                 <img
                   src={preview}
                   alt={`Preview ${index}`}
-                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
+                  className="h-24 w-24 object-cover rounded-md"
                 />
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(index)}
-                  style={{
-                    position: 'absolute',
-                    top: '5px',
-                    right: '5px',
-                    background: 'red',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'pointer',
-                  }}
+                  className="absolute top-0 right-0 bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center"
                 >
                   X
                 </button>
@@ -190,18 +203,15 @@ const AddProducts = () => {
             ))}
           </div>
         </div>
-        <input
+        <button
           type="submit"
-          value={isLoading ? 'Submitting...' : 'Submit'}
           disabled={isLoading}
-          style={{
-            padding: '10px 20px',
-            background: isLoading ? '#ccc' : '#0070f3',
-            color: 'white',
-            border: 'none',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-          }}
-        />
+          className={`px-4 py-2 text-white rounded-md ${
+            isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+        >
+          {isLoading ? 'Submitting...' : 'Submit'}
+        </button>
       </form>
     </div>
   );

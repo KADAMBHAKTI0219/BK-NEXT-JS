@@ -1,3 +1,4 @@
+"use client"
 import { profileUserData } from '@/lib/authApi'
 import React, { useEffect, useState } from 'react'
 

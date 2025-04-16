@@ -1,9 +1,8 @@
-'use client';
+"use client";
 import { getProductById, updateProduct } from '@/lib/productsApi';
 import React, { useState, useEffect } from 'react';
 
-const UpdateProducts = ({ params }) => {
-  const { id } = params;
+const UpdateProducts = ({id }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -18,13 +17,14 @@ const UpdateProducts = ({ params }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [categories, setCategories] = useState([]);
-  const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:1337';
+  const BASE_URL =  'http://localhost:1337';
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (id) => {
       try {
         const productData = await getProductById(id);
         const product = productData?.data || {};
+        console.log(prodcut)
         setFormData({
           name: product.name || '',
           price: product.price || '',
