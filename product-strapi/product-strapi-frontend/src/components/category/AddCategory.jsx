@@ -23,7 +23,7 @@ const AddCategory = () => {
 
     if (!formData.name) {
       setError('Name is required.');
-      setIsLoading(false);
+      setIsLoading(false);    
       return;
     }
 
@@ -48,7 +48,7 @@ const AddCategory = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow">
+    <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow mt-32">
       <h2 className="text-2xl font-bold mb-4">Add New Category</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
       <form onSubmit={handleSubmit}>

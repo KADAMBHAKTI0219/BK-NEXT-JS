@@ -37,17 +37,17 @@ export const loginUserData = async (userData) => {
 
 export const profileUserData = async () => {
   const token = localStorage.getItem("jwt");
+  console.log(token)
   try {
     const profileData = await axios.get(PROFILE_URL, {
-      headers:{
+      headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       }
     });
     console.log("Profile data fetched successfully:", profileData.data);
     return profileData.data;
-  }
-  catch{
+  } catch (error) {
     console.error("Error fetching profile data:", error);
     throw error;
   }

@@ -12,16 +12,38 @@ const Login = () => {
   }
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor='identifier'>Email</label>
-        <input type="email" id='identifier' name='identifier' required /><br />
-        
-        <label htmlFor='password'>Password</label>
-        <input type="password" name="password" id="password" required /><br />
-        
-        <button type="submit">Login</button>
-      </form>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="identifier" className="block text-gray-700 font-medium mb-1">Email</label>
+            <input
+              type="email"
+              id="identifier"
+              name="identifier"
+              required
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            />
+          </div>
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-gray-700 font-medium mb-1">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              required
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 transform hover:scale-105"
+          >
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

@@ -59,29 +59,29 @@ const ProductsList = () => {
   }, [searchFilter, categoryFilter, priceFilter, stockFilter]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="py-6 px-4 sm:px-6 lg:px-8 bg-white shadow-md">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">Products List</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex-1">
+      <div className="py-6 px-4 sm:px-6 lg:px-8 bg-white shadow-lg">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+          <h1 className="text-3xl font-bold text-gray-800">Products List</h1>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <input
               type="text"
               placeholder="Search by Name or Category..."
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full sm:w-64"
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
             />
             <select
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
               <option value="">Select Category</option>
-              <option value="chocolates">Chocolates</option>
+              <option value="chocolate">Chocolates</option>
               <option value="cakes">Cakes</option>
             </select>
             <select
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
               value={priceFilter}
               onChange={(e) => setPriceFilter(e.target.value)}
             >
@@ -91,7 +91,7 @@ const ProductsList = () => {
               <option value="200-300">Range 200-300</option>
             </select>
             <select
-              className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
               value={stockFilter}
               onChange={(e) => setStockFilter(e.target.value)}
             >
@@ -104,7 +104,7 @@ const ProductsList = () => {
           <div className="flex gap-4">
             <Link
               href="/create?type=product"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 transform hover:scale-105"
             >
               Add Product
             </Link>
@@ -112,16 +112,16 @@ const ProductsList = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Images</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Images</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Stock</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -131,7 +131,7 @@ const ProductsList = () => {
                 </tr>
               ) : productList.length > 0 ? (
                 productList.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
+                  <tr key={product.id} className="hover:bg-gray-50 transition duration-150">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap justify-center gap-3 mb-4">
                         {product.images && Array.isArray(product.images) ? (
@@ -140,7 +140,7 @@ const ProductsList = () => {
                               key={imgIndex}
                               src={getImageUrl(img)}
                               alt={img.name || 'Product Image'}
-                              className="w-20 h-20 object-cover rounded border"
+                              className="w-20 h-20 object-cover rounded-md border border-gray-200 shadow-sm"
                             />
                           ))
                         ) : (
@@ -149,15 +149,20 @@ const ProductsList = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${product.price}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.stock}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category?.name || 'No Category'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${product.price}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.stock}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.category?.name || 'No Category'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Link href={`/update/${product.documentId}?type=product`} className="text-blue-600 hover:text-blue-800 mr-4">
+                      <Link
+                        href={`/update/${product.documentId}?type=product`}
+                        className="text-blue-600 hover:text-blue-800 mr-4 transition duration-200 hover:underline"
+                      >
                         Edit
                       </Link>
                       <button
-                        className="text-red-600 hover:text-red-800"
+                        className={`text-red-600 hover:text-red-800 transition duration-200 ${
+                          deletingId === product.documentId ? 'opacity-50 cursor-not-allowed' : 'hover:underline'
+                        }`}
                         onClick={() => handleDelete(product.documentId)}
                         disabled={deletingId === product.documentId}
                       >

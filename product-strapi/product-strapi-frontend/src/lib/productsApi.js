@@ -34,22 +34,6 @@ export const getProducts = async ({ search = '', category = '', price = '', stoc
   }
 };
 
-export const getProductById = async (id) => {
-  try {
-    const response = await axios.get(`${PRODUCT_URL}/${id}?populate=*`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAuthorization(),
-      },
-    });
-    console.log('Product fetched successfully:', response.data.data);
-    return response.data; // Returns { data: { id, name, price, stock, category, images, ... } }
-  } catch (error) {
-    console.error('Error fetching product by ID:', error.response?.data || error.message);
-    throw error;
-  }
-};
-
 export const createProduct = async (productData) => {
   try {
     const response = await axios.post(PRODUCT_URL, { data: productData }, {
@@ -66,23 +50,7 @@ export const createProduct = async (productData) => {
   }
 };
 
-export const updateProduct = async (id, formData) => {
-  try {
-    const response = await axios.put(`${PRODUCT_URL}/${id}?populate=*`, formData, {
-      headers: {
-        // Let browser set Content-Type for FormData
-        ...getAuthorization(),
-      },
-    });
-    console.log('Product updated successfully:', response.data.data);
-    return response.data.data; // Returns { id, name, price, stock, category, images, ... }
-  } catch (error) {
-    const errorMessage =
-      error.response?.data?.error?.message || error.message || 'Failed to update product';
-    console.error('Error updating product:', errorMessage);
-    throw new Error(errorMessage);
-  }
-};
+
 
 export const deleteProduct = async (id) => {
   try {
@@ -108,7 +76,7 @@ export const uploadImages = async (images) => {
       formData.append('files', image);
     });
 
-    const response = await axios.post(UPLOAD_URL, formData, {
+    const response = await axios.post(`${BASE_URL}/api/upload`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...getAuthorization(),
@@ -119,5 +87,39 @@ export const uploadImages = async (images) => {
   } catch (error) {
     console.error('Error uploading images:', error.response?.data || error.message);
     throw new Error(error.response?.data?.error?.message || 'Failed to upload images');
+  }
+};
+
+export const updateProduct = async (id, payload) => {
+  try {
+    const response = await axios.put(`${BASE_URL}/api/products/${id}?populate=*`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthorization(),
+      },
+    });
+    console.log('Product updated successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    const errorMessage =
+      error.response?.data?.error?.message || error.message || 'Failed to update product';
+    console.error('Error updating product:', errorMessage);
+    throw new Error(errorMessage);
+  }
+};
+
+export const getProductById = async (id) => {
+  try {
+    const response = await axios.get(`${BASE_URL}/api/products/${id}?populate=*`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthorization(),
+      },
+    });
+    console.log('Product fetched successfully:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching product:', error.response?.data || error.message);
+    throw new Error(error.response?.data?.error?.message || 'Failed to fetch product');
   }
 };

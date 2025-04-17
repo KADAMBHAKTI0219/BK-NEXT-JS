@@ -1,8 +1,7 @@
 'use client';
 
-import { getCategories } from '@/lib/categoryApi';
-import { getProductById, updateProduct } from '@/lib/productsApi';
-import { getImageUrl } from '@/lib/utils';
+import { getProductById, updateProduct, uploadImages } from '@/lib/productsApi';
+import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 
 const UpdateProducts = ({ id }) => {
@@ -25,38 +24,48 @@ const UpdateProducts = ({ id }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch product
         const productData = await getProductById(id);
-        console.log('Raw product data:', productData); // Debug
-        if (!productData?.data) {
-          setError('Product not found');
-          setIsInitialized(true);
-          return;
-        }
-        const product = productData.data || {};
-        console.log('Fetched product:', product);
+        const product = productData?.data?.attributes || productData?.data || {};
+        
         setFormData({
           name: product.name || '',
-          price: product.price || '',
-          stock: product.stock || '',
-          category: product.category?.id || '', // Adjusted for direct category.id
+          price: product.price?.toString() || '',
+          stock: product.stock?.toString() || '',
+          category: product.category?.data?.id || product.category?.id || '',
           images: [],
         });
-        const images = product.images || [];
+
+        // Set existing images
+        const images = product.images?.data || product.images || [];
         setExistingImages(
           images.map((img) => ({
             id: img.id,
-            url: getImageUrl(img, BASE_URL), // Ensure getImageUrl handles direct img.url
-            name: img.name || 'Product Image',
+            url: img.attributes?.url?.includes('http') 
+              ? img.attributes.url 
+              : `${BASE_URL}${img.attributes?.url || img.url}`,
+            name: img.attributes?.name || img.name || 'Product Image',
           }))
         );
 
-        const categories = await getCategories();
-        setCategories(categories);
+        // Fetch categories
+        const categoriesResponse = await axios.get(`${BASE_URL}/api/categories`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+          },
+        });
+        setCategories(
+          categoriesResponse.data.data.map((cat) => ({
+            id: cat.id,
+            name: cat.attributes?.name || cat.name,
+          }))
+        );
+
         setIsInitialized(true);
       } catch (error) {
         console.error('Error fetching data:', error);
         setError(`Failed to load product or categories: ${error.message}`);
-        setIsInitialized(true);
       }
     };
     if (id) fetchData();
@@ -83,8 +92,7 @@ const UpdateProducts = ({ id }) => {
       const previews = validFiles.map((file) => URL.createObjectURL(file));
       setImagePreviews(previews);
     } else {
-      const newValue = name === 'price' || name === 'stock' ? Number(value) : value;
-      setFormData((prev) => ({ ...prev, [name]: newValue }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -109,6 +117,7 @@ const UpdateProducts = ({ id }) => {
     setError(null);
     setIsLoading(true);
 
+    // Validation
     if (!formData.name || !formData.price || !formData.stock || !formData.category) {
       setError('All fields are required');
       setIsLoading(false);
@@ -125,30 +134,56 @@ const UpdateProducts = ({ id }) => {
       return;
     }
 
-    const data = new FormData();
-    data.append('data.name', formData.name);
-    data.append('data.price', Number(formData.price));
-    data.append('data.stock', Number(formData.stock));
-    data.append('data.category', Number(formData.category));
-    if (deletedImageIds.length > 0) {
-      data.append('data.deletedImageIds', JSON.stringify(deletedImageIds));
-    }
-    formData.images.forEach((image) => {
-      data.append('files.images', image);
-    });
-
     try {
-      const response = await updateProduct(id, data);
-      console.log('Product updated:', response);
+      // First, upload new images if any
+      let uploadedImageIds = [];
+      if (formData.images.length > 0) {
+        const uploadResponse = await uploadImages(formData.images);
+        uploadedImageIds = uploadResponse.data.map((img) => img.id);
+      }
+
+      // Prepare payload for product update
+      const payload = {
+        data: {
+          name: formData.name,
+          price: Number(formData.price),
+          stock: Number(formData.stock),
+          category: Number(formData.category),
+          images: [
+            ...existingImages
+              .filter((img) => !deletedImageIds.includes(img.id))
+              .map((img) => img.id),
+            ...uploadedImageIds,
+          ],
+        },
+      };
+
+      // Update product
+      const response = await updateProduct(id, payload);
+      
+      // Update state with new data
+      const updatedProduct = response.data?.attributes || response.data;
+      setFormData({
+        name: updatedProduct.name || '',
+        price: updatedProduct.price?.toString() || '',
+        stock: updatedProduct.stock?.toString() || '',
+        category: updatedProduct.category?.data?.id || updatedProduct.category?.id || '',
+        images: [],
+      });
+
+      // Update existing images
+      const updatedImages = updatedProduct.images?.data || updatedProduct.images || [];
       setExistingImages(
-        response.images?.map((img) => ({
+        updatedImages.map((img) => ({
           id: img.id,
-          url: getImageUrl(img, BASE_URL),
-          name: img.name || 'Product Image',
-        })) || []
+          url: img.attributes?.url?.includes('http') 
+            ? img.attributes.url 
+            : `${BASE_URL}${img.attributes?.url || img.url}`,
+          name: img.attributes?.name || img.name || 'Product Image',
+        }))
       );
+
       setImagePreviews([]);
-      setFormData((prev) => ({ ...prev, images: [] }));
       setDeletedImageIds([]);
       alert('Product updated successfully!');
     } catch (error) {
@@ -161,156 +196,134 @@ const UpdateProducts = ({ id }) => {
     }
   };
 
-  if (!isInitialized) return <div style={{ textAlign: 'center' }}>Loading product data...</div>;
+  if (!isInitialized) return <div className="text-center text-gray-600">Loading...</div>;
 
   return (
-    <div style={{ maxWidth: '400px', margin: '20px auto', fontFamily: 'Arial' }}>
-      <h2>Update Product</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="name">Product:</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-            style={{ width: '100%', padding: '5px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="price">Price:</label>
-          <input
-            type="number"
-            id="price"
-            name="price"
-            value={formData.price}
-            onChange={handleInputChange}
-            min="0"
-            step="0.01"
-            required
-            style={{ width: '100%', padding: '5px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="stock">Stock:</label>
-          <input
-            type="number"
-            id="stock"
-            name="stock"
-            value={formData.stock}
-            onChange={handleInputChange}
-            min="0"
-            required
-            style={{ width: '100%', padding: '5px' }}
-          />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="category">Category:</label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleInputChange}
-            required
-            style={{ width: '100%', padding: '5px' }}
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="max-w-lg w-full bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Update Product</h2>
+        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+        <div onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label htmlFor="name" className="block text-gray-700 font-medium mb-1">Product:</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="price" className="block text-gray-700 font-medium mb-1">Price:</label>
+            <input
+              type="number"
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleInputChange}
+              min="0"
+              step="0.01"
+              required
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="stock" className="block text-gray-700 font-medium mb-1">Stock:</label>
+            <input
+              type="number"
+              id="stock"
+              name="stock"
+              value={formData.stock}
+              onChange={handleInputChange}
+              min="0"
+              required
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="category" className="block text-gray-700 font-medium mb-1">Category:</label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleInputChange}
+              required
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-1">Existing Images:</label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {existingImages.map((image, index) => (
+                <div key={image.id} className="relative">
+                  <img
+                    src={image.url}
+                    alt={image.name}
+                    className="w-24 h-24 object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index, false)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition duration-200 transform hover:scale-110"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label htmlFor="images" className="block text-gray-700 font-medium mb-1">New Images:</label>
+            <input
+              type="file"
+              id="images"
+              name="images"
+              accept="image/jpeg,image/png"
+              multiple
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            />
+            <div className="flex flex-wrap gap-2 mt-2">
+              {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={preview}
+                    alt={`Preview ${index}`}
+                    className="w-24 h-24 object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveImage(index, true)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition duration-200 transform hover:scale-110"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className={`w-full py-2 px-4 rounded-md text-white font-medium transition duration-200 transform hover:scale-105 ${
+              isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+            }`}
           >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            {isLoading ? 'Updating...' : 'Update'}
+          </button>
         </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Existing Images:</label>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
-            {existingImages.map((image, index) => (
-              <div key={image.id} style={{ position: 'relative' }}>
-                <img
-                  src={image.url}
-                  alt={image.name}
-                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index, false)}
-                  style={{
-                    position: 'absolute',
-                    top: '5px',
-                    right: '5px',
-                    background: 'red',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label htmlFor="images">New Images:</label>
-          <input
-            type="file"
-            id="images"
-            name="images"
-            accept="image/jpeg,image/png"
-            multiple
-            onChange={handleInputChange}
-            style={{ width: '100%' }}
-          />
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '10px' }}>
-            {imagePreviews.map((preview, index) => (
-              <div key={index} style={{ position: 'relative' }}>
-                <img
-                  src={preview}
-                  alt={`Preview ${index}`}
-                  style={{ width: '100px', height: '100px', objectFit: 'cover' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(index, true)}
-                  style={{
-                    position: 'absolute',
-                    top: '5px',
-                    right: '5px',
-                    background: 'red',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '20px',
-                    height: '20px',
-                    cursor: 'pointer',
-                  }}
-                >
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-        <input
-          type="submit"
-          value={isLoading ? 'Updating...' : 'Update'}
-          disabled={isLoading}
-          style={{
-            padding: '10px 20px',
-            background: isLoading ? '#ccc' : '#0070f3',
-            color: 'white',
-            border: 'none',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
-          }}
-        />
-      </form>
+      </div>
     </div>
   );
 };
