@@ -1,6 +1,6 @@
 'use client';
 
-import { getCategoryById } from '@/lib/categoryApi';
+import { getCategoryById, updateCategory } from '@/lib/categoryApi';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 
@@ -15,14 +15,13 @@ const EditCategory = ({ id }) => {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    let mounted = true; // Prevent updates if component unmounts
-
+    let mounted = true;
+  
     const fetchCategory = async () => {
       setIsLoading(true);
       try {
-        const response = await getCategoryById(id); // Await the API call
+        const category = await getCategoryById(id); // No .data.data needed
         if (mounted) {
-          const category = response.data.data;
           setFormData({
             name: category.name || '',
             fabric: category.fabric || '',
@@ -43,13 +42,14 @@ const EditCategory = ({ id }) => {
         }
       }
     };
-
+  
     fetchCategory();
-
+  
     return () => {
-      mounted = false; // Cleanup to prevent state updates after unmount
+      mounted = false;
     };
   }, [id]);
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -75,21 +75,13 @@ const EditCategory = ({ id }) => {
     }
 
     try {
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/categories/${id}`, // Use environment variable
-        {
-          data: {
-            name: formData.name,
-            fabric: formData.fabric || null,
-          },
+      await updateCategory(id, {
+        data: {
+          name: formData.name,
+          fabric: formData.fabric || null,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      });
+      
       alert('Category updated successfully!'); // Replace with better UX in production
     } catch (err) {
       console.error('Submission error:', err.message || err);

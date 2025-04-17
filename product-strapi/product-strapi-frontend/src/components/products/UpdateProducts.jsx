@@ -1,8 +1,11 @@
-"use client";
+'use client';
+
+import { getCategories } from '@/lib/categoryApi';
 import { getProductById, updateProduct } from '@/lib/productsApi';
+import { getImageUrl } from '@/lib/utils';
 import React, { useState, useEffect } from 'react';
 
-const UpdateProducts = ({id }) => {
+const UpdateProducts = ({ id }) => {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -17,35 +20,43 @@ const UpdateProducts = ({id }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [categories, setCategories] = useState([]);
-  const BASE_URL =  'http://localhost:1337';
+  const BASE_URL = 'http://localhost:1337';
 
   useEffect(() => {
-    const fetchData = async (id) => {
+    const fetchData = async () => {
       try {
         const productData = await getProductById(id);
-        const product = productData?.data || {};
-        console.log(prodcut)
+        console.log('Raw product data:', productData); // Debug
+        if (!productData?.data) {
+          setError('Product not found');
+          setIsInitialized(true);
+          return;
+        }
+        const product = productData.data || {};
+        console.log('Fetched product:', product);
         setFormData({
           name: product.name || '',
           price: product.price || '',
           stock: product.stock || '',
-          category: product.category?.data?.id || '',
+          category: product.category?.id || '', // Adjusted for direct category.id
           images: [],
         });
-        const images = product.images?.data || [];
+        const images = product.images || [];
         setExistingImages(
           images.map((img) => ({
             id: img.id,
-            url: `${BASE_URL}${img.url.startsWith('/') ? '' : '/'}${img.url}`,
-            name: img.name,
+            url: getImageUrl(img, BASE_URL), // Ensure getImageUrl handles direct img.url
+            name: img.name || 'Product Image',
           }))
         );
-        // Mock fetchCategories
-        setCategories([{ id: 3, name: 'Chocolates' }]); // Replace with API call
+
+        const categories = await getCategories();
+        setCategories(categories);
         setIsInitialized(true);
       } catch (error) {
-        console.error('Error fetching product:', error);
-        setError(`Failed to load product: ${error.message}`);
+        console.error('Error fetching data:', error);
+        setError(`Failed to load product or categories: ${error.message}`);
+        setIsInitialized(true);
       }
     };
     if (id) fetchData();
@@ -72,7 +83,8 @@ const UpdateProducts = ({id }) => {
       const previews = validFiles.map((file) => URL.createObjectURL(file));
       setImagePreviews(previews);
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      const newValue = name === 'price' || name === 'stock' ? Number(value) : value;
+      setFormData((prev) => ({ ...prev, [name]: newValue }));
     }
   };
 
@@ -102,14 +114,24 @@ const UpdateProducts = ({id }) => {
       setIsLoading(false);
       return;
     }
+    if (Number(formData.price) <= 0) {
+      setError('Price must be greater than 0');
+      setIsLoading(false);
+      return;
+    }
+    if (Number(formData.stock) < 0) {
+      setError('Stock cannot be negative');
+      setIsLoading(false);
+      return;
+    }
 
     const data = new FormData();
-    data.append('name', formData.name);
-    data.append('price', Number(formData.price));
-    data.append('stock', Number(formData.stock));
-    data.append('category', Number(formData.category));
+    data.append('data.name', formData.name);
+    data.append('data.price', Number(formData.price));
+    data.append('data.stock', Number(formData.stock));
+    data.append('data.category', Number(formData.category));
     if (deletedImageIds.length > 0) {
-      data.append('deletedImageIds', JSON.stringify(deletedImageIds));
+      data.append('data.deletedImageIds', JSON.stringify(deletedImageIds));
     }
     formData.images.forEach((image) => {
       data.append('files.images', image);
@@ -119,17 +141,19 @@ const UpdateProducts = ({id }) => {
       const response = await updateProduct(id, data);
       console.log('Product updated:', response);
       setExistingImages(
-        response.data.images?.data?.map((img) => ({
+        response.images?.map((img) => ({
           id: img.id,
-          url: `${BASE_URL}${img.url}`,
-          name: img.name,
+          url: getImageUrl(img, BASE_URL),
+          name: img.name || 'Product Image',
         })) || []
       );
       setImagePreviews([]);
       setFormData((prev) => ({ ...prev, images: [] }));
       setDeletedImageIds([]);
+      alert('Product updated successfully!');
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message;
+      const errorMessage =
+        error.response?.data?.error?.message || error.message || 'An unexpected error occurred';
       console.error('Submission error:', error);
       setError(`Update failed: ${errorMessage}`);
     } finally {
@@ -137,7 +161,7 @@ const UpdateProducts = ({id }) => {
     }
   };
 
-  if (!isInitialized) return <div>Loading...</div>;
+  if (!isInitialized) return <div style={{ textAlign: 'center' }}>Loading product data...</div>;
 
   return (
     <div style={{ maxWidth: '400px', margin: '20px auto', fontFamily: 'Arial' }}>

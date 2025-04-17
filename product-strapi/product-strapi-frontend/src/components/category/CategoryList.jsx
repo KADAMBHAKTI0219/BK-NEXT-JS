@@ -6,31 +6,42 @@ import React, { useEffect, useState } from 'react';
 
 const CategoryList = () => {
   const [categoryList, setCategoryList] = useState([]);
+  const [allCategories, setAllCategories] = useState([]); 
   const [nameFilter, setNameFilter] = useState('');
   const [searchFilter, setSearchFilter] = useState('');
 
   const fetchCategories = async () => {
     try {
       const data = await getCategories({ name: nameFilter, search: searchFilter });
-      setCategoryList(data)
+      setCategoryList(data);
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
   };
 
- 
-   const handleDelete = async (id) => {
+  const fetchAllCategories = async () => {
+    try {
+      const data = await getCategories({});
+      setAllCategories(data);
+    } catch (err) {
+      console.error('Error fetching all categories:', err);
+    }
+  };
 
-     try {
-       console.log('Deleting product with ID:', id);
-       await deleteCategory(id);
-       alert('Product deleted successfully!');
-       fetchCategories();
-     } catch (error) {
-       console.error('Error deleting product:', error.response?.data || error.message)
-     }
-   };
- 
+  const handleDelete = async (id) => {
+    try {
+      console.log('Deleting product with ID:', id);
+      await deleteCategory(id);
+      alert('Product deleted successfully!');
+      fetchCategories();
+    } catch (error) {
+      console.error('Error deleting product:', error.response?.data || error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllCategories();
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => fetchCategories(), 300);
@@ -49,8 +60,11 @@ const CategoryList = () => {
               onChange={(e) => setNameFilter(e.target.value)}
             >
               <option value="">All Categories</option>
-              <option value="chocolates">Chocolates</option>
-              <option value="cakes">Cakes</option>
+              {allCategories.map((el) => (
+                <option value={el.name} key={el.id}>
+                  {el.name}
+                </option>
+              ))}
             </select>
             <input
               type="text"
@@ -61,13 +75,14 @@ const CategoryList = () => {
             />
           </div>
           <Link
-              href="/create?type=category"
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-            >
-              Add Category
-            </Link>
+            href="/create?type=category"
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          >
+            Add Category
+          </Link>
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
@@ -102,7 +117,9 @@ const CategoryList = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="px-6 py-4 text-center text-gray-500">No categories found.</td>
+                  <td colSpan="3" className="px-6 py-4 text-center text-gray-500">
+                    No categories found.
+                  </td>
                 </tr>
               )}
             </tbody>

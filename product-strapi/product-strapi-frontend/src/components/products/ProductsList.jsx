@@ -1,6 +1,7 @@
 'use client';
 
 import { deleteProduct, getProducts } from '@/lib/productsApi';
+import { getImageUrl } from '@/lib/utils';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 
@@ -11,8 +12,10 @@ const ProductsList = () => {
   const [priceFilter, setPriceFilter] = useState('');
   const [stockFilter, setStockFilter] = useState('');
   const [deletingId, setDeletingId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchProducts = async () => {
+    setIsLoading(true);
     try {
       const data = await getProducts({
         search: searchFilter,
@@ -20,20 +23,22 @@ const ProductsList = () => {
         price: priceFilter,
         stock: stockFilter,
       });
-      console.log('Fetched products:', data); // Debug fetched data
+      console.log('Fetched products:', data);
       setProductsList(data);
     } catch (err) {
       console.error('Error fetching products:', err.response?.data || err.message);
       alert('Failed to fetch products. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (documentId) => {
     if (!confirm('Are you sure you want to delete this product?')) return;
-    setDeletingId(id);
+    setDeletingId(documentId);
     try {
-      console.log('Deleting product with ID:', id);
-      await deleteProduct(id);
+      console.log('Deleting product with documentId:', documentId);
+      await deleteProduct(documentId);
       alert('Product deleted successfully!');
       fetchProducts();
     } catch (error) {
@@ -120,27 +125,24 @@ const ProductsList = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {productList.length > 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-4 text-center text-gray-500">Loading...</td>
+                </tr>
+              ) : productList.length > 0 ? (
                 productList.map((product) => (
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-wrap justify-center gap-3 mb-4">
                         {product.images && Array.isArray(product.images) ? (
-                          product.images.map((img, imgIndex) => {
-                            const imageUrl =
-                              img?.formats?.medium?.url ||
-                              img?.formats?.small?.url ||
-                              img?.formats?.thumbnail?.url ||
-                              img?.url;
-                            return (
-                              <img
-                                key={imgIndex}
-                                src={`http://localhost:1337${imageUrl}`}
-                                alt={img.name || 'Product Image'}
-                                className="w-20 h-20 object-cover rounded border"
-                              />
-                            );
-                          })
+                          product.images.map((img, imgIndex) => (
+                            <img
+                              key={imgIndex}
+                              src={getImageUrl(img)}
+                              alt={img.name || 'Product Image'}
+                              className="w-20 h-20 object-cover rounded border"
+                            />
+                          ))
                         ) : (
                           <div className="text-gray-400">No images</div>
                         )}
@@ -151,10 +153,7 @@ const ProductsList = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.stock}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{product.category?.name || 'No Category'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <Link
-                        className="text-blue-600 hover:text-blue-800 mr-4"
-                        href={`/update/${product.documentId}?type=product`}
-                      >
+                      <Link href={`/update/${product.documentId}?type=product`} className="text-blue-600 hover:text-blue-800 mr-4">
                         Edit
                       </Link>
                       <button
