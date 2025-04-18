@@ -16,22 +16,30 @@ export function AppProvider({ children }) {
           items: prev.items.map((i) =>
             i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
           ),
+          total: prev.total + item.price,
         };
       }
       return {
         ...prev,
         items: [...prev.items, { ...item, quantity: 1 }],
+        total: prev.total + item.price,
       };
     });
   };
 
   const removeItem = (item) => {
-    setCart((prev) => ({
-      ...prev,
-      items: prev.items
+    setCart((prev) => {
+      const existingItem = prev.items.find((i) => i.id === item.id);
+      if (!existingItem) return prev;
+      const newItems = prev.items
         .map((i) => (i.id === item.id ? { ...i, quantity: i.quantity - 1 } : i))
-        .filter((i) => i.quantity > 0),
-    }));
+        .filter((i) => i.quantity > 0);
+      return {
+        ...prev,
+        items: newItems,
+        total: prev.total - item.price,
+      };
+    });
   };
 
   const resetCart = () => {

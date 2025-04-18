@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:1337';
+const BASE_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
 const PRODUCT_URL = `${BASE_URL}/api/products`;
 const UPLOAD_URL = `${BASE_URL}/api/upload`;
 
 const getAuthorization = () => {
   const jwt = typeof window !== 'undefined' ? localStorage.getItem('jwt') : null;
-  return jwt ? { Authorization: `Bearer ${jwt}` } : {};
+  return jwt ? { Authorization: `Bearer ${jwt}` } : {
+    Authorization: `Bearer ${process.env.NEXT_PUBLIC_STRAPI_API_TOKEN}`
+  };
 };
 
 export const getProducts = async ({ search = '', category = '', price = '', stock = '' }) => {
@@ -50,8 +52,6 @@ export const createProduct = async (productData) => {
   }
 };
 
-
-
 export const deleteProduct = async (id) => {
   try {
     console.log('Sending DELETE request for product ID:', id);
@@ -76,7 +76,7 @@ export const uploadImages = async (images) => {
       formData.append('files', image);
     });
 
-    const response = await axios.post(`${BASE_URL}/api/upload`, formData, {
+    const response = await axios.post(`${UPLOAD_URL}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
         ...getAuthorization(),

@@ -4,6 +4,7 @@ import { deleteProduct, getProducts } from '@/lib/productsApi';
 import { getImageUrl } from '@/lib/utils';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { useAppContext } from '@/context/AppContext';
 
 const ProductsList = () => {
   const [productList, setProductsList] = useState([]);
@@ -13,6 +14,7 @@ const ProductsList = () => {
   const [stockFilter, setStockFilter] = useState('');
   const [deletingId, setDeletingId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { addItem } = useAppContext();
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -167,6 +169,12 @@ const ProductsList = () => {
                         disabled={deletingId === product.documentId}
                       >
                         {deletingId === product.documentId ? 'Deleting...' : 'Delete'}
+                      </button>
+                      <button
+                        onClick={() => addItem(product)}
+                        className="ml-4 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition duration-200"
+                      >
+                        Add to Cart
                       </button>
                     </td>
                   </tr>
