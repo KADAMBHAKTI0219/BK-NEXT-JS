@@ -4,6 +4,7 @@ import AddProducts from '@/components/products/AddProducts';
 import AddCategory from '@/components/category/AddCategory';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import Link from 'next/link';
 
 function CreateContent() {
   const searchParams = useSearchParams();
