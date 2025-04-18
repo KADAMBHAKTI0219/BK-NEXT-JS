@@ -1,4 +1,5 @@
-import Profile from '@/components/authentication/profile'
+
+import Profile from '@/components/authentication/Profile'
 import React from 'react'
 
 const page = () => {
