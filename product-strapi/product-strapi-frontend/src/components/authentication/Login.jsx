@@ -1,14 +1,27 @@
 "use client"
 import { loginUserData } from '@/lib/authApi';
-import React from 'react'
+import { useRouter } from 'next/navigation';
+import React from 'react';
 
 const Login = () => {
+  const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    loginUserData(data);
+
+    try {
+      const response = await loginUserData(data);
+      if (response?.jwt) { 
+        router.push('/dashboard');
+      } else {
+        alert('Invalid credentials. Please try again!');      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Register First after Login');
+      router.push('/auth/register')
+    }
   }
 
   return (
@@ -45,7 +58,7 @@ const Login = () => {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
 export default Login;

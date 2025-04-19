@@ -2,7 +2,9 @@
 
 import { getCategoryById, updateCategory } from '@/lib/categoryApi';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import Layout from '../layout';
 
 const EditCategory = ({ id }) => {
   console.log('id', id);
@@ -13,6 +15,7 @@ const EditCategory = ({ id }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const router = useRouter()
 
   useEffect(() => {
     let mounted = true;
@@ -82,7 +85,8 @@ const EditCategory = ({ id }) => {
         },
       });
       
-      alert('Category updated successfully!'); // Replace with better UX in production
+      alert('Category updated successfully!'); 
+      router.push('/category')
     } catch (err) {
       console.error('Submission error:', err.message || err);
       setError(
@@ -112,7 +116,8 @@ const EditCategory = ({ id }) => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow">
+    <Layout>
+        <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-4">Edit Category</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
       <form onSubmit={handleSubmit}>
@@ -150,6 +155,7 @@ const EditCategory = ({ id }) => {
         </button>
       </form>
     </div>
+    </Layout>
   );
 };
 

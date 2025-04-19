@@ -1,6 +1,7 @@
 "use client"
 import { profileUserData } from '@/lib/authApi'
 import React, { useEffect, useState } from 'react'
+import Layout from '../layout'
 
 const Profile = () => {
     const [profile, setProfile] = useState(null)
@@ -38,7 +39,8 @@ const Profile = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center p-4">
+        <Layout>
+               <div className="flex items-center justify-center p-4 mt-16">
             <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 flex flex-col items-center">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">User Profile</h2>
                 <div className="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center mb-4">
@@ -70,6 +72,7 @@ const Profile = () => {
                 </button>
             </div>
         </div>
+        </Layout>
     )
 }
 

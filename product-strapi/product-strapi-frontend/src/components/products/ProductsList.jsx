@@ -4,7 +4,7 @@ import { deleteProduct, getProducts } from '@/lib/productsApi';
 import { getImageUrl } from '@/lib/utils';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { useAppContext } from '@/context/AppContext';
+import Layout from '../layout';
 
 const ProductsList = () => {
   const [productList, setProductsList] = useState([]);
@@ -14,7 +14,6 @@ const ProductsList = () => {
   const [stockFilter, setStockFilter] = useState('');
   const [deletingId, setDeletingId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { addItem } = useAppContext();
 
   const fetchProducts = async () => {
     setIsLoading(true);
@@ -61,7 +60,8 @@ const ProductsList = () => {
   }, [searchFilter, categoryFilter, priceFilter, stockFilter]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 flex-1">
+    <Layout>
+        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
       <div className="py-6 px-4 sm:px-6 lg:px-8 bg-white shadow-lg">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <h1 className="text-3xl font-bold text-gray-800">Products List</h1>
@@ -150,19 +150,19 @@ const ProductsList = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${product.price}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.stock}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{product.category?.name || 'No Category'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{product.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-semibold">${product.price}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-semibold">{product.stock}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-semibold">{product.category?.name || 'No Category'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
                       <Link
                         href={`/update/${product.documentId}?type=product`}
-                        className="text-blue-600 hover:text-blue-800 mr-4 transition duration-200 hover:underline"
+                        className="text-blue-600 hover:text-blue-800 mr-4 transition duration-200 hover:underline font-semibold text-base"
                       >
                         Edit
                       </Link>
                       <button
-                        className={`text-red-600 hover:text-red-800 transition duration-200 ${
+                        className={`text-red-600 hover:text-red-800 transition duration-200  font-semibold text-base ${
                           deletingId === product.documentId ? 'opacity-50 cursor-not-allowed' : 'hover:underline'
                         }`}
                         onClick={() => handleDelete(product.documentId)}
@@ -170,12 +170,7 @@ const ProductsList = () => {
                       >
                         {deletingId === product.documentId ? 'Deleting...' : 'Delete'}
                       </button>
-                      <button
-                        onClick={() => addItem(product)}
-                        className="ml-4 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition duration-200"
-                      >
-                        Add to Cart
-                      </button>
+                    
                     </td>
                   </tr>
                 ))
@@ -189,6 +184,7 @@ const ProductsList = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 

@@ -2,7 +2,9 @@
 
 import { getProductById, updateProduct, uploadImages } from '@/lib/productsApi';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import Layout from '../layout';
 
 const UpdateProducts = ({ id }) => {
   const [formData, setFormData] = useState({
@@ -20,6 +22,7 @@ const UpdateProducts = ({ id }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [categories, setCategories] = useState([]);
   const BASE_URL = 'http://localhost:1337';
+  const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -186,6 +189,7 @@ const UpdateProducts = ({ id }) => {
       setImagePreviews([]);
       setDeletedImageIds([]);
       alert('Product updated successfully!');
+      router.push('/product')
     } catch (error) {
       const errorMessage =
         error.response?.data?.error?.message || error.message || 'An unexpected error occurred';
@@ -199,7 +203,8 @@ const UpdateProducts = ({ id }) => {
   if (!isInitialized) return <div className="text-center text-gray-600">Loading...</div>;
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+   <Layout>
+     <div className="min-h-screen flex items-center justify-center">
       <div className="max-w-lg w-full bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Update Product</h2>
         {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
@@ -325,6 +330,7 @@ const UpdateProducts = ({ id }) => {
         </div>
       </div>
     </div>
+   </Layout>
   );
 };
 

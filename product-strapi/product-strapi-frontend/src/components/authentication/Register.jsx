@@ -1,19 +1,34 @@
 "use client"
-import { registerUserData } from '@/lib/authApi'
-import React from 'react'
+import { registerUserData } from '@/lib/authApi';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 
 const Register = () => {
-     const handleSubmit=(e)=>{
-          e.preventDefault()
-          const formData = new FormData(e.target)
-          const data = Object.fromEntries(formData.entries())
-          registerUserData(data)
-        }
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const response = await registerUserData(data);
+      if (response?.user) {
+        router.push('/auth/login');
+      } else {
+        alert('Registration failed. Please check your input.');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('Something went wrong. Try again!');
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Register</h2>
-        <div onSubmit={(e)=>handleSubmit(e)}>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="username" className="block text-gray-700 font-medium mb-1">User Name</label>
             <input
@@ -45,16 +60,15 @@ const Register = () => {
             />
           </div>
           <button
-            type="button"
-            onClick={(e)=>handleSubmit(e)}
+            type="submit"
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 transform hover:scale-105"
           >
             Register
           </button>
-        </div>
+        </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default Register
+export default Register;

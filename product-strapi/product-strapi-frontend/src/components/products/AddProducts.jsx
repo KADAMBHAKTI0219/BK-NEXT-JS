@@ -2,7 +2,9 @@
 
 import { createProduct, uploadImages } from '@/lib/productsApi';
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import Layout from '../layout';
 
 const AddProducts = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ const AddProducts = () => {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
 
   // Fetch categories
   useEffect(() => {
@@ -108,6 +111,7 @@ const AddProducts = () => {
       });
       setImagePreviews([]);
       alert('Product created successfully!');
+      router.push('/product')
     } catch (err) {
       console.error('Submission error:', err.response?.data || err.message);
       setError(`Failed to create product: ${err.response?.data?.error?.message || err.message}`);
@@ -117,7 +121,8 @@ const AddProducts = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow">
+  <Layout>
+     <div className="max-w-7xl mx-auto bg-white p-6 rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-4">Add New Product</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
       <form onSubmit={handleSubmit}>
@@ -214,6 +219,7 @@ const AddProducts = () => {
         </button>
       </form>
     </div>
+  </Layout>
   );
 };
 

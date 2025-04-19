@@ -3,6 +3,7 @@
 import { deleteCategory, getCategories } from '@/lib/categoryApi';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import Layout from '../layout';
 
 const CategoryList = () => {
   const [categoryList, setCategoryList] = useState([]);
@@ -55,8 +56,8 @@ const CategoryList = () => {
   }, [nameFilter, searchFilter]);
 
   return (
-    
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <Layout>
+       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
       <div className="py-6 px-4 sm:px-6 lg:px-8 bg-white shadow-lg">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
           <h1 className="text-3xl font-bold text-gray-800">Category List</h1>
@@ -136,6 +137,7 @@ const CategoryList = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 

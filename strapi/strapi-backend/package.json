@@ -18,11 +18,14 @@
     "@strapi/plugin-cloud": "5.12.3",
     "@strapi/plugin-users-permissions": "5.12.3",
     "@strapi/strapi": "5.12.3",
+    "@stripe/react-stripe-js": "^3.6.0",
+    "@stripe/stripe-js": "^7.1.0",
     "better-sqlite3": "11.3.0",
     "passport-github2": "^0.1.12",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",
+    "stripe": "^18.0.0",
     "styled-components": "^6.0.0"
   },
   "engines": {

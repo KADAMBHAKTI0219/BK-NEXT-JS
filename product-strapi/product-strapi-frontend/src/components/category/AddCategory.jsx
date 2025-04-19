@@ -1,7 +1,9 @@
 'use client';
 
 import axios from 'axios';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import Layout from '../layout';
 
 const AddCategory = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +12,7 @@ const AddCategory = () => {
   });
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,6 +42,7 @@ const AddCategory = () => {
       console.log('Category created:', response.data);
       setFormData({ name: '', fabric: '' });
       alert('Category created successfully!');
+      router.push('/category')
     } catch (err) {
       console.error('Submission error:', err.response?.data || err.message);
       setError(`Failed to create category: ${err.response?.data?.error?.message || err.message}`);
@@ -48,7 +52,8 @@ const AddCategory = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow mt-32">
+   <Layout>
+     <div className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow mt-32">
       <h2 className="text-2xl font-bold mb-4">Add New Category</h2>
       {error && <p className="text-red-600 mb-4">{error}</p>}
       <form onSubmit={handleSubmit}>
@@ -84,6 +89,7 @@ const AddCategory = () => {
         </button>
       </form>
     </div>
+   </Layout>
   );
 };
 
