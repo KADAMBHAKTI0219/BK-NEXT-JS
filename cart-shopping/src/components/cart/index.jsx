@@ -8,7 +8,7 @@ const Cart = () => {
   const dispatch = useDispatch()
 
   return (
-    <div className='max-w-7xl m-auto text-center relative h-full'>
+    <div className='max-w-7xl m-auto text-center relative  min-h-screen'>
       <h1>My Cart</h1>
       {
         cart.length === 0 ?
@@ -26,7 +26,7 @@ const Cart = () => {
             ))
           }
 
-          <div className='absolute bottom-0 w-full flex justify-evenly text-2xl'>
+          <div className='absolute bottom-0 w-full flex justify-evenly text-2xl my-40'>
             <p>Total: ${total}</p>
             <p>Discount: ${discount}</p>
             <p>Final Price: ${total - discount}</p>

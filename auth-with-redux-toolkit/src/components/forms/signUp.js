@@ -28,7 +28,7 @@ const SignUp = () => {
         </p>
 
         <form action="#" className="mt-6 mb-0 space-y-4 rounded-lg p-4 shadow-lg sm:p-6 lg:p-8" onSubmit={handleSubmit(onSubmit)}>
-        <p className="text-center text-lg font-medium">Sign in to your account</p>
+        <p className="text-center text-lg font-medium">Sign Up to your account</p>
 
         <div>
         <label htmlFor="email" className="sr-only">Email</label>
