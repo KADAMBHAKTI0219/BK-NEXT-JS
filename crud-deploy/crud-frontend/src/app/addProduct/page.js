@@ -1,3 +1,4 @@
+"use client"
 import AddProduct from "@/components/product/AddProduct";
 import { createProduct } from "@/lib/ProductApi";
 import { useRouter } from "next/navigation";

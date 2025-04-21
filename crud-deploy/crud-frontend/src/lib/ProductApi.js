@@ -1,7 +1,7 @@
 const { default: axios } = require("axios");
 
 
-const BACKEND_URL = "https://bk-crud-backend-production.up.railway.app/product";
+const BACKEND_URL = "http://localhost:9090/product";
 
 
 export const createProduct = async (formData) => {
