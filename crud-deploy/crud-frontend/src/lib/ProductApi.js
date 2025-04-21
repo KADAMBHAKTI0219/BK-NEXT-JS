@@ -1,7 +1,7 @@
-const { default: axios } = require("axios");
+import axios from "axios";
 
 
-const BACKEND_URL = "http://localhost:9090/product";
+const BACKEND_URL = "http://localhost:8080/products";
 
 
 export const createProduct = async (formData) => {
@@ -9,7 +9,7 @@ export const createProduct = async (formData) => {
         const config = {
             headers: {
                 'Content-Type': 'multipart/form-data', 
-            },
+            },  
         };
         const createResponse = await axios.post(`${BACKEND_URL}/create`, formData, config);
         console.log("Product created successfully:", createResponse.data);
