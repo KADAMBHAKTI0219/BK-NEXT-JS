@@ -26,7 +26,6 @@ export default function ProductDetails({ productId }) {
         setLoading(false);
       }
     };
-    fetchProduct();
   }, [productId]);
 
   if (loading) return <div>Loading...</div>;
