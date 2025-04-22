@@ -31,7 +31,7 @@ export default function AddProduct({ onSave, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto my-10">
       <h2 className="text-xl font-bold mb-4">Add Product</h2>
       <div className="grid gap-4">
         <input name="title" value={formData.title} onChange={handleChange} placeholder="Title" className="border p-2 rounded" required />

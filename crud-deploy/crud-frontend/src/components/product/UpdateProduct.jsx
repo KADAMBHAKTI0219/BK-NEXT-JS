@@ -55,7 +55,7 @@ export default function UpdateProduct({ id, onSave, onCancel }) {
   if (loading) return <div className="text-center p-4">Loading...</div>;
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-3xl mx-auto my-28">
       <h2 className="text-xl font-bold mb-4">Edit Product</h2>
       <div className="grid gap-4">
         <input
