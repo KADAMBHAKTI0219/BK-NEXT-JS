@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-const BACKEND_URL = "http://localhost:8080/products";
+const BACKEND_URL = "https://bk-crud-deploy-production.up.railway.app/api/items"
 
 
 export const createProduct = async (formData) => {
