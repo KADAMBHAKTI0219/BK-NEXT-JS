@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 export default function ProductCard({ product, onDelete, onEdit }) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+  const baseUrl = "https://bk-crud-deploy-production.up.railway.app" || 'http://localhost:8080';
   const imageUrl = product.image ? `${baseUrl}${product.image}` : 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?cs=srgb&dl=pexels-souvenirpixels-417074.jpg&fm=jpg';
   return (
     <div className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">

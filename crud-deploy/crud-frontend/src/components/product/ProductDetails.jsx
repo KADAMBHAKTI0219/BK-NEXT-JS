@@ -33,7 +33,7 @@ export default function ProductDetails({ productId }) {
   if (error) return <div>{error}</div>;
   if (!product) return <div>Product not found</div>;
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080';
+const baseUrl = "https://bk-crud-deploy-production.up.railway.app" || 'http://localhost:8080';
 const imageUrl = product.image ? `${baseUrl}${product.image}` : 'https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?cs=srgb&dl=pexels-souvenirpixels-417074.jpg&fm=jpg';
   return (
     <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto mt-20">
