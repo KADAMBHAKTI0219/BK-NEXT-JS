@@ -47,7 +47,7 @@ export default function ProductList() {
         <input
           type="text"
           placeholder="Title"
-          value={newProduct.title}
+          value={newProduct.title}  
           onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
           className="border p-2 rounded-md outline-none focus:ring-2 focus:ring-blue-500 "
         />
