@@ -91,7 +91,7 @@ export const VisaFinderTool = [
         },
         {
           type: "Transit",
-          cost: 0, // Free for transit <48 hours
+          cost: "Free for transit < 48 hours", // Free for transit <48 hours
           duration: "Up to 48 hours",
           validity: "Single entry",
           notes: "No visa needed for transit through Canada if staying in airport. Otherwise, visitor visa required."
