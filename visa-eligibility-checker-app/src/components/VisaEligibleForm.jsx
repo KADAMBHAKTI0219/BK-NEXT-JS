@@ -14,12 +14,11 @@ const backgroundValue = [
 ];
 
 const VisaEligibleForm = () => {
-  const [selectedCountry, setSelectedCountry] = useState(""); // Start with no country selected
+  const [selectedCountry, setSelectedCountry] = useState(""); 
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [eligibleMessage, setEligibleMessage] = useState("");
-  const [lastBackgroundStyle, setLastBackgroundStyle] = useState("bg-gray-100");
 
   // Get background based on selected country
   const selectedCountryLabel = visaFormData[2].options.find(
@@ -78,7 +77,6 @@ const VisaEligibleForm = () => {
     };
     localStorage.setItem("visaFormData", JSON.stringify(finalData));
     setEligibleMessage(checkEligibility(finalData));
-    setLastBackgroundStyle(backgroundStyle);
     setErrors({});
     setSubmitted(true);
     setFormData({});
