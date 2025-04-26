@@ -1,7 +1,6 @@
 const cron = require('node-cron');
 const axios = require('axios');
 
-// Schedule cron job to run every hour (at minute 0)
 cron.schedule('0 * * * *', async () => {
   console.log('Running cache revalidation cron job...', new Date().toISOString());
   try {
