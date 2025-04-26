@@ -1,10 +1,25 @@
 // app/api/cache/products/route.js
 import { NextResponse } from 'next/server';
 
-// In-memory cache (replace with Redis in production)
+// Initialize with sample data
 let productsCache = {
-  data: [],
-  lastUpdated: null
+  data: [
+    {
+      id: 1,
+      title: "Premium Wireless Headphones",
+      price: 199.99,
+      category: "electronics",
+      description: "High-quality wireless headphones with noise cancellation"
+    },
+    {
+      id: 2,
+      title: "Organic Cotton T-Shirt",
+      price: 29.99,
+      category: "clothing",
+      description: "Comfortable organic cotton t-shirt"
+    }
+  ],
+  lastUpdated: new Date().toISOString()
 };
 
 export async function GET() {
@@ -15,9 +30,10 @@ export async function GET() {
       lastUpdated: productsCache.lastUpdated
     });
   } catch (error) {
+    // Fallback to sample data if error occurs
     return NextResponse.json({
       success: false,
-      products: [],
+      products: productsCache.data, // Return cached data even on error
       error: error.message
     });
   }
@@ -26,11 +42,19 @@ export async function GET() {
 export async function POST(request) {
   try {
     const { products = [] } = await request.json();
-    productsCache = {
-      data: products,
-      lastUpdated: new Date().toISOString()
-    };
-    return NextResponse.json({ success: true });
+    
+    // Only update if we received products
+    if (products.length > 0) {
+      productsCache = {
+        data: products,
+        lastUpdated: new Date().toISOString()
+      };
+    }
+    
+    return NextResponse.json({ 
+      success: true,
+      productsCount: productsCache.data.length
+    });
   } catch (error) {
     return NextResponse.json({
       success: false,
