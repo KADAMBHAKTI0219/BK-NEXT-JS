@@ -2,8 +2,6 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
-const MIN_PRODUCTS = 2; // Minimum products to consider update valid
-
 export async function POST(request) {
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -11,42 +9,26 @@ export async function POST(request) {
   }
 
   try {
-    // 1. Fetch from external API with timeout
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
+    // Fetch from external API
+    const apiResponse = await fetch('https://fakestoreapi.com/products');
+    if (!apiResponse.ok) throw new Error('Failed to fetch products');
     
-    const apiResponse = await fetch('https://fakestoreapi.com/products', {
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
+    const products = await apiResponse.json();
+    
+    // Validate products - FIXED THIS LINE
+    if (!Array.isArray(products)) throw new Error('Invalid products format');
+    if (products.length === 0) throw new Error('No products received');
 
-    if (!apiResponse.ok) {
-      throw new Error(`API responded with ${apiResponse.status}`);
-    }
-    
-    let products = await apiResponse.json();
-    
-    // 2. Validate we got sufficient products
-    if (!Array.isArray(products)) {
-      throw new Error('Invalid products data format');
-    }
-    
-    if (products.length < MIN_PRODUCTS) {
-      throw new Error(`Insufficient products received (${products.length})`);
-    }
-
-    // 3. Update cache
+    // Update cache
     const cacheResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/cache/products`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ products })
     });
 
-    if (!cacheResponse.ok) {
-      throw new Error('Failed to update cache');
-    }
+    if (!cacheResponse.ok) throw new Error('Cache update failed');
 
-    // 4. Revalidate
+    // Revalidate
     revalidatePath('/');
     revalidateTag('products');
     
@@ -57,22 +39,15 @@ export async function POST(request) {
     });
   } catch (error) {
     console.error('Revalidation error:', error);
+    
+    // Get current cache state for debugging
+    const cacheState = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/cache/products`);
+    const cacheData = await cacheState.json();
+    
     return NextResponse.json({ 
       success: false,
       error: error.message,
-      cacheStatus: await getCacheStatus()
+      currentCache: cacheData
     }, { status: 500 });
-  }
-}
-
-async function getCacheStatus() {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/cache/products`);
-    if (response.ok) {
-      return await response.json();
-    }
-    return { error: 'Cache status check failed' };
-  } catch (error) {
-    return { error: error.message };
   }
 }
