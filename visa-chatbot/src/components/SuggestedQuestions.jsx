@@ -11,12 +11,9 @@ const SuggestedQuestions = ({ onSelect, onToggle }) => {
 
     return (
         <div className="relative bg-gray-50 border-t p-3">
-            {/* Toggle Button (Close/Show) */}
             <button
                 onClick={onToggle}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-sm"
-            >
-                ✖
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-sm">✖
             </button>
             <div className="flex flex-wrap gap-2">
                 {suggestions.map((q, idx) => (

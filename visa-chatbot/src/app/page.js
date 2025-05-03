@@ -1,5 +1,4 @@
 import ChatWindow from "@/components/ChatWindow";
-import Practice from "@/components/pratcice";
 export default function Home() {
   return (
     <>
